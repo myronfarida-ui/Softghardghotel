@@ -104,8 +104,10 @@
   .roof::after{content:"GRAND HOTEL";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#ffe08a;
     color:#7a3e07;font-weight:700;letter-spacing:.12em;font-size:.72rem;padding:2px 14px;border-radius:10px;border:2px solid var(--gold-d);white-space:nowrap}
   .rfloor{position:relative;display:grid;grid-template-columns:1fr minmax(64px,22%) 1fr;min-height:200px;border-bottom:8px solid #6b3a17}
+  .rfloor.f4{background:linear-gradient(180deg,#ffe1a8,#ffcf6e)}
   .rfloor.f3{background:linear-gradient(180deg,#e3c9f5,#d5b3ee)}
-  .rfloor.f2{background:linear-gradient(180deg,#bfe3f5,#9bd0ec);border-bottom:0}
+  .rfloor.f2{background:linear-gradient(180deg,#bfe3f5,#9bd0ec)}
+  .rfloor.f1{background:linear-gradient(180deg,#cdeccb,#a8dba0);border-bottom:0}
   .rfloor::after{content:"";position:absolute;left:0;right:0;bottom:0;height:10px;
     background:repeating-linear-gradient(90deg,#8b5a2b 0 30px,#7a4d22 30px 60px)}
   .floor-tag{position:absolute;top:6px;left:8px;z-index:3;font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:12px;
@@ -424,23 +426,34 @@ const WORDS=[
   {w:"energy",e:"⚡",t:"soft",ip:"/ˈenərdʒi/",h:"g + y → Soft G"},
   {w:"stage",e:"🎭",t:"soft",ip:"/steɪdʒ/",h:"-ge at the end → Soft G"},
   {w:"bridge",e:"🌉",t:"soft",ip:"/brɪdʒ/",h:"-dge → Soft G"},
-  {w:"legend",e:"📜",t:"soft",ip:"/ˈledʒənd/",h:"g + e → Soft G"}
+  {w:"legend",e:"📜",t:"soft",ip:"/ˈledʒənd/",h:"g + e → Soft G"},
+  {w:"gravy",e:"🥣",t:"hard",ip:"/ˈɡreɪvi/",h:"g + r → Hard G"},
+  {w:"guava",e:"🍈",t:"hard",ip:"/ˈɡwɑːvə/",h:"g + u → Hard G"},
+  {w:"gumbo",e:"🍲",t:"hard",ip:"/ˈɡʌmboʊ/",h:"g + u → Hard G"},
+  {w:"granola",e:"🥣",t:"hard",ip:"/ɡrəˈnoʊlə/",h:"g + r → Hard G"},
+  {w:"gelato",e:"🍨",t:"soft",ip:"/dʒəˈlɑːtoʊ/",h:"g + e → Soft G"},
+  {w:"gingerbread",e:"🍪",t:"soft",ip:"/ˈdʒɪndʒərbred/",h:"g + i → Soft G"}
 ];
-const FOOD=["grape","garlic","gum","glass","ginger","orange"];
+const FOOD=["grape","garlic","gum","glass","ginger","orange","gravy","guava","gumbo","granola","gelato","gingerbread"];
 const GUEST_POOL=[
   {e:"🐻",n:"Mr. Bear"},{e:"🐰",n:"Bunny"},{e:"🦊",n:"Mrs. Fox"},{e:"🐼",n:"Panda"},
   {e:"🦁",n:"Leo"},{e:"🐸",n:"Froggy"},{e:"🐧",n:"Pip"},{e:"🐯",n:"Tigger"},
   {e:"🐨",n:"Koala"},{e:"🐵",n:"Momo"},{e:"🦄",n:"Sparkle"},{e:"🐙",n:"Ollie"}
 ];
 const ROOM_DEF={
+  '101':{floor:1,price:80,fee:25,name:'Garden'},
+  '102':{floor:1,price:130,fee:25,name:'Garden'},
   '201':{floor:2,price:0,fee:40,name:'Deluxe'},
   '202':{floor:2,price:0,fee:40,name:'Deluxe'},
   '301':{floor:3,price:250,fee:80,name:'VIP'},
-  '302':{floor:3,price:400,fee:80,name:'VIP'}
+  '302':{floor:3,price:400,fee:80,name:'VIP'},
+  '401':{floor:4,price:600,fee:130,name:'Sky Suite'},
+  '402':{floor:4,price:800,fee:150,name:'Sky Suite'}
 };
+const REPAIR_COST={1:20,2:30,3:60,4:100,gym:25,rest:20};
 const GYM_EQ=[{e:"🏃",n:"Treadmill"},{e:"🚴",n:"Bike"},{e:"🏋️",n:"Weights"}];
 const GYM_SLOTS=3, TABLES=4;
-const RATE={checkin:1.4,room:2,gym:2,rest:2,checkout:1.4};
+const RATE={checkin:1.4,room:2,gym:2,rest:2,checkout:1.1};
 const PAGES=['lobby','rooms','gym','rest','cashier'];
 const THEMES=[
   {k:'gold',gold:'#f5b921',goldd:'#b9770e',blue:'#3b82f6'},
@@ -454,7 +467,11 @@ const OPEN_MIN=9*60, CLOSE_MIN=16*60, MAX_DAYS=5, MIN_PER_TICK=3;
 const S={
   coins:300,happy:100,streak:0,best:0,checkouts:0,mission:5,income:0,
   guests:{},nextId:1,
-  rooms:{'201':{unlocked:true,guest:null},'202':{unlocked:true,guest:null},'301':{unlocked:false,guest:null},'302':{unlocked:false,guest:null}},
+  rooms:{'101':{unlocked:false,guest:null,broken:false},'102':{unlocked:false,guest:null,broken:false},
+    '201':{unlocked:true,guest:null,broken:false},'202':{unlocked:true,guest:null,broken:false},
+    '301':{unlocked:false,guest:null,broken:false},'302':{unlocked:false,guest:null,broken:false},
+    '401':{unlocked:false,guest:null,broken:false},'402':{unlocked:false,guest:null,broken:false}},
+  gymBroken:[false,false,false],restBroken:[false,false,false,false],
   upg:{speed:0,patience:0,bonus:0},learn:{},
   page:'lobby',mute:false,liftFloor:2,spawnIn:1,bellCd:0,_t:0,_noSave:false,
   hotelName:'Grand Hotel: G-Sounds',theme:'gold',
@@ -468,10 +485,11 @@ const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(M
 const hl=w=>w.replace(/g/i,m=>`<b>${m}</b>`);
 const G=()=>Object.values(S.guests);
 const at=loc=>G().filter(g=>g.loc===loc);
-const freeRooms=()=>Object.keys(S.rooms).filter(id=>S.rooms[id].unlocked&&!S.rooms[id].guest);
+const freeRooms=()=>Object.keys(S.rooms).filter(id=>S.rooms[id].unlocked&&!S.rooms[id].guest&&!S.rooms[id].broken);
 const patColor=p=>p<30?'#e5484d':p<60?'#f5b921':'#2fb36d';
-const billTotal=g=>g.bill.reduce((s,b)=>s+b.price,0);
-function freeSlot(loc,max){const used=at(loc).map(g=>g.slot);for(let i=0;i<max;i++)if(!used.includes(i))return i;return -1}
+const billTotal=g=>g.bill.reduce((s,b)=>s+b.price*(b.qty||1),0);
+function randQty(){const r=Math.random();return r<0.5?1:r<0.8?2:3}
+function freeSlot(loc,max){const used=at(loc).map(g=>g.slot);const brk=loc==='gym'?S.gymBroken:S.restBroken;for(let i=0;i<max;i++)if(!used.includes(i)&&!brk[i])return i;return -1}
 const isOpen=()=>!S.gameOver&&S.timeMin<CLOSE_MIN;
 function fmtTime(min){let h=Math.floor(min/60),m=Math.round(min%60);if(m===60){m=0;h++}
   const ap=h>=12?'PM':'AM';let hh=h%12;if(hh===0)hh=12;return hh+':'+String(m).padStart(2,'0')+' '+ap}
@@ -543,7 +561,9 @@ function save(){
       coins:S.coins,best:S.best,checkouts:S.checkouts,mission:S.mission,income:S.income,
       upg:S.upg,learn:S.learn,mute:S.mute,hotelName:S.hotelName,theme:S.theme,
       day:S.day,timeMin:S.timeMin,gameOver:S.gameOver,
-      unlocked:Object.keys(S.rooms).filter(id=>S.rooms[id].unlocked)
+      unlocked:Object.keys(S.rooms).filter(id=>S.rooms[id].unlocked),
+      broken:Object.keys(S.rooms).filter(id=>S.rooms[id].broken),
+      gymBroken:S.gymBroken,restBroken:S.restBroken
     }));
   }catch(e){}
 }
@@ -565,6 +585,9 @@ function load(){
     if(typeof d.timeMin==='number')S.timeMin=d.timeMin;
     if(typeof d.gameOver==='boolean')S.gameOver=d.gameOver;
     if(Array.isArray(d.unlocked))d.unlocked.forEach(id=>{if(S.rooms[id])S.rooms[id].unlocked=true});
+    if(Array.isArray(d.broken))d.broken.forEach(id=>{if(S.rooms[id])S.rooms[id].broken=true});
+    if(Array.isArray(d.gymBroken))S.gymBroken=d.gymBroken;
+    if(Array.isArray(d.restBroken))S.restBroken=d.restBroken;
   }catch(e){}
 }
 let resetArm=false;
@@ -688,6 +711,9 @@ function roomHTML(id){
   if(!R.unlocked){
     inner=`<div class="rbody"><span class="big">🔒</span><span class="lbl">Locked</span></div>
       <div class="ract"><button class="btn gold sm" onclick="buyRoom('${id}')">Unlock ${D.price} 🪙</button></div>`;
+  }else if(R.broken){
+    inner=`<div class="rbody"><span class="big">🔧</span><span class="lbl">Needs repair!</span></div>
+      <div class="ract"><button class="btn red sm" onclick="repairRoom('${id}')">Fix ${REPAIR_COST[D.floor]} 🪙</button></div>`;
   }else if(!R.guest){
     inner=`<div class="rbody"><span class="big faded">🛏️</span><span class="lbl">Empty · ${D.fee}🪙</span></div><div class="ract"></div>`;
   }else{
@@ -711,14 +737,17 @@ function renderRooms(){
   <div class="scene">
     <div class="scene-head"><h2>🛏️ Rooms</h2><span class="tip">Guests in their rooms ask for help</span></div>
     <div class="roof"></div>
+    <section class="rfloor f4"><div class="floor-tag">🌟 Floor 4 · Sky Suite</div>${roomHTML('401')}${liftHTML(4)}${roomHTML('402')}</section>
     <section class="rfloor f3"><div class="floor-tag">👑 Floor 3 · VIP Penthouse</div>${roomHTML('301')}${liftHTML(3)}${roomHTML('302')}</section>
     <section class="rfloor f2"><div class="floor-tag">✨ Floor 2 · Deluxe Rooms</div>${roomHTML('201')}${liftHTML(2)}${roomHTML('202')}</section>
-  </div>${hint('🛎️ Tap a guest with a speech bubble to help. Unlock VIP rooms to earn more!')}`;
+    <section class="rfloor f1"><div class="floor-tag">🌿 Floor 1 · Garden Rooms</div>${roomHTML('101')}${liftHTML(1)}${roomHTML('102')}</section>
+  </div>${hint('🛎️ Tap a guest with a speech bubble to help. Unlock more rooms — and fix any that break down! 🔧')}`;
 }
 
 function renderGym(){
   const gs=at('gym');
   const slots=GYM_EQ.map((m,i)=>{
+    if(S.gymBroken[i])return `<div class="equip" style="border-color:#e5484d;border-style:solid"><span class="em">🔧</span><span>${m.n}<br>Broken!</span><button class="btn red sm" onclick="repairGym(${i})">Fix ${REPAIR_COST.gym} 🪙</button></div>`;
     const g=gs.find(x=>x.slot===i);
     return g?`<div class="equip busy">${gcard(g,{mini:true,ask:g.word.e,label:'Find the Soft G!'})}<span>${m.e} ${m.n}</span></div>`
             :`<div class="equip"><span class="em">${m.e}</span><span>${m.n}<br>Free</span></div>`;
@@ -729,12 +758,13 @@ function renderGym(){
     <div class="wall gym-wall"><div class="mirror"></div>
       <div class="coach"><span class="deco">🦸</span><span>Soft G power!<br>g + e, i, y</span></div></div>
     <div class="floorarea gym-floor"><div class="equips">${slots}</div></div>
-  </div>${hint('💪 Tap a guest at a machine, then tap the word that has a SOFT G.')}`;
+  </div>${hint('💪 Tap a guest at a machine, then tap the word that has a SOFT G. Fix any broken machines! 🔧')}`;
 }
 
 function renderRest(){
   const gs=at('rest');
   const tables=[...Array(TABLES).keys()].map(i=>{
+    if(S.restBroken[i])return `<div class="tbl" style="border-color:#e5484d"><span class="em">🔧</span><div class="cloth"></div><span>Table ${i+1}<br>Broken!</span><button class="btn red sm" onclick="repairRest(${i})">Fix ${REPAIR_COST.rest} 🪙</button></div>`;
     const g=gs.find(x=>x.slot===i);
     return g?`<div class="tbl">${gcard(g,{mini:true,ask:g.word.e,label:'Take the order'})}<div class="cloth"></div><span>Table ${i+1}</span></div>`
             :`<div class="tbl"><span class="em">🪑</span><div class="cloth"></div><span>Table ${i+1}<br>Free</span></div>`;
@@ -744,27 +774,27 @@ function renderRest(){
     <div class="scene-head"><h2>🍽️ Restaurant</h2><span class="tip">Take orders and serve tasty food</span></div>
     <div class="wall rest-wall">
       <div class="kitchen"><span class="deco">👨‍🍳</span><span>Kitchen<br>open!</span><span class="deco">🍳</span></div>
-      <div class="menu"><b>Today's menu</b><br>🍇 grape · 🧄 garlic · 🍬 gum<br>🥛 glass · 🫚 ginger · 🍊 orange</div>
+      <div class="menu"><b>Today's menu</b><br>🍇 grape · 🧄 garlic · 🍬 gum · 🥛 glass<br>🫚 ginger · 🍊 orange · 🥣 gravy · 🍈 guava<br>🍲 gumbo · 🥣 granola · 🍨 gelato · 🍪 gingerbread</div>
     </div>
     <div class="floorarea rest-floor"><div class="tables">${tables}</div></div>
-  </div>${hint('🍽️ Tap a guest to take their order. Is it a Hard G or a Soft G word?')}`;
+  </div>${hint('🍽️ Tap a guest to take their order. Is it a Hard G or a Soft G word? Fix any broken tables! 🔧')}`;
 }
 
 function renderCashier(){
   const q=at('cashier');
   $('page-cashier').innerHTML=`
   <div class="scene">
-    <div class="scene-head"><h2>💳 Cashier · Check-out</h2><span class="tip">Read the bill, then count the change</span></div>
+    <div class="scene-head"><h2>💳 Cashier · Check-out</h2><span class="tip">Add up the bill, then count the change</span></div>
     <div class="wall cash-wall">
       <span class="deco">🕰️</span>
       <div class="register"><span class="deco">🧾</span><div>Cash register<br><span class="income">Earned today: ${S.income} 🪙</span></div></div>
       <span class="deco">🪴</span>
     </div>
     <div class="floorarea cash-floor">
-      <div class="queue">${q.length?q.map(g=>gcard(g,{ask:'🧾',label:`Bill: ${billTotal(g)} 🪙 · Tap to pay`})).join(''):
+      <div class="queue">${q.length?q.map(g=>gcard(g,{ask:'🧾',label:`${g.bill.length} item${g.bill.length>1?'s':''} · Tap to add up!`})).join(''):
         '<div class="emptyq">No one is waiting to pay.<br>Guests come here when their stay is done 💳</div>'}</div>
     </div>
-  </div>${hint('💳 Tap a guest → read every line of the bill → count the change!')}`;
+  </div>${hint('💳 Tap a guest → multiply each line, add it all up on the calculator → then count the change!')}`;
 }
 
 function pickWord(kind,g){
@@ -807,6 +837,39 @@ function buyRoom(id){
   S.coins-=p;S.rooms[id].unlocked=true;sfx.coin();confetti(30);toast(`Room ${id} unlocked! 🎉`);
   updateHUD();renderAll();save();
 }
+function repairRoom(id){
+  const D=ROOM_DEF[id],c=REPAIR_COST[D.floor];
+  if(S.coins<c){toast(`You need ${c} 🪙 saved up to fix Room ${id}!`);sfx.bad();return}
+  S.coins-=c;S.rooms[id].broken=false;sfx.coin();confetti(24);toast(`🛠️ Room ${id} is fixed!`);
+  updateHUD();renderAll();save();
+}
+function repairGym(i){
+  const c=REPAIR_COST.gym;
+  if(S.coins<c){toast(`You need ${c} 🪙 saved up to fix the ${GYM_EQ[i].n}!`);sfx.bad();return}
+  S.coins-=c;S.gymBroken[i]=false;sfx.coin();confetti(24);toast(`🛠️ The ${GYM_EQ[i].n} is fixed!`);
+  updateHUD();renderAll();save();
+}
+function repairRest(i){
+  const c=REPAIR_COST.rest;
+  if(S.coins<c){toast(`You need ${c} 🪙 saved up to fix Table ${i+1}!`);sfx.bad();return}
+  S.coins-=c;S.restBroken[i]=false;sfx.coin();confetti(24);toast(`🛠️ Table ${i+1} is fixed!`);
+  updateHUD();renderAll();save();
+}
+function tryBreak(){
+  if(!isOpen())return;
+  const brokenCount=Object.values(S.rooms).filter(r=>r.broken).length+S.gymBroken.filter(Boolean).length+S.restBroken.filter(Boolean).length;
+  if(brokenCount>=2||Math.random()>0.012)return;
+  const pool=[];
+  Object.keys(S.rooms).forEach(id=>{const R=S.rooms[id];if(R.unlocked&&!R.guest&&!R.broken)pool.push({type:'room',id})});
+  for(let i=0;i<GYM_SLOTS;i++)if(!S.gymBroken[i]&&!at('gym').some(g=>g.slot===i))pool.push({type:'gym',id:i});
+  for(let i=0;i<TABLES;i++)if(!S.restBroken[i]&&!at('rest').some(g=>g.slot===i))pool.push({type:'rest',id:i});
+  if(!pool.length)return;
+  const pick=rnd(pool);
+  if(pick.type==='room'){S.rooms[pick.id].broken=true;toast(`🔧 Uh oh! Room ${pick.id} needs repairs.`)}
+  else if(pick.type==='gym'){S.gymBroken[pick.id]=true;toast(`🔧 The ${GYM_EQ[pick.id].n} broke down!`)}
+  else{S.restBroken[pick.id]=true;toast(`🔧 Table ${pick.id+1} is wobbly and needs fixing!`)}
+  renderAll();save();
+}
 function tapGuest(id){
   const g=S.guests[id];if(!g||g.state!=='need')return;
   if(g.kind==='checkin'){
@@ -825,7 +888,7 @@ function giveKey(gid,rid){
   R.guest=g.id;g.room=rid;g.loc='room';g.state='idle';g.kind=null;g.word=null;
   g.timer=3+Math.floor(Math.random()*3);g.patience=100;g.served=0;
   g.vip=ROOM_DEF[rid].floor===3;
-  g.bill=[{icon:'🛏️',label:`Room ${rid}`,word:g.checkinWord,price:ROOM_DEF[rid].fee}];
+  g.bill=[{icon:'🛏️',label:`Room ${rid}`,word:g.checkinWord,price:ROOM_DEF[rid].fee,qty:1}];
   S.liftFloor=ROOM_DEF[rid].floor;S.coins+=10;
   closeQuiz();sfx.ok();confetti(20);toast(`🔑 ${g.n} is in Room ${rid}!`);
   updateHUD();renderAll();save();
@@ -846,7 +909,8 @@ function nextActivity(g){
 function serveGuest(g){
   const price={room:15,gym:20,rest:25}[g.kind],icon={room:'🛎️',gym:'🏋️',rest:'🍽️'}[g.kind],
         label={room:'Room service',gym:'Gym',rest:'Restaurant'}[g.kind],extra={room:5,gym:15,rest:10}[g.kind];
-  g.bill.push({icon,label,word:g.word,price});
+  const qty=randQty();
+  g.bill.push({icon,label,word:g.word,price,qty});
   S.coins+=extra+S.upg.bonus*3;S.happy=Math.min(100,S.happy+3);
   g.served++;g.state='idle';g.kind=null;g.word=null;g.loc='room';g.slot=null;
   g.timer=4+Math.floor(Math.random()*4);g.patience=100;
@@ -1025,17 +1089,23 @@ function startChangeStep(g){
   const total=billTotal(g);
   let payment=Math.ceil(total/50)*50;if(payment===total)payment+=50;
   const change=payment-total;
-  calcState={gid:g.id,value:'',correct:change,wrong:0};
-  $('qTitle').textContent=`💵 Cashier · ${g.n}`;$('qSub').textContent='Use the calculator to work out the change';
-  $('qReceipt').classList.remove('hidden');$('qReceipt').innerHTML=
-    g.bill.map(it=>`<div class="rc done"><span>${it.icon} ${it.label}</span><span>${it.price} 🪙</span></div>`).join('')+
-    `<div class="tot">Total: ${total} 🪙 · Guest paid: ${payment} 🪙</div>`;
+  calcState={gid:g.id,stage:'total',value:'',correctTotal:total,payment,correctChange:change,wrong:0};
+  $('qTitle').textContent=`💵 Cashier · ${g.n}`;
   $('qRule').classList.add('hidden');$('qFeedback').innerHTML='';
-  renderCalc();
+  renderReceiptStage();renderCalc();
+}
+function renderReceiptStage(){
+  if(!calcState)return;
+  const g=S.guests[calcState.gid];if(!g)return;
+  const lines=g.bill.map(it=>`<div class="rc"><span>${it.icon} ${it.label}${it.qty>1?' ×'+it.qty:''}</span><span>${it.price} 🪙${it.qty>1?' each':''}</span></div>`).join('');
+  const totLine=calcState.stage==='total'?`<div class="tot">Total: ? 🪙</div>`:`<div class="tot">Total: ${calcState.correctTotal} 🪙 · Guest paid: ${calcState.payment} 🪙</div>`;
+  $('qReceipt').classList.remove('hidden');$('qReceipt').innerHTML=lines+totLine;
 }
 function renderCalc(){
   if(!calcState)return;
-  $('qBody').innerHTML=`<div class="ask-line">Paid − Total = Change. How much change?</div>
+  const isTotal=calcState.stage==='total';
+  $('qSub').textContent=isTotal?'Multiply each line by its ×qty, then add every line up!':'Now: Guest paid − Total = Change. How much back?';
+  $('qBody').innerHTML=`<div class="ask-line">${isTotal?'What is the total bill?':'How much change do you give back?'}</div>
     <div class="calcDisplay" id="calcDisplay">${calcState.value||'0'} 🪙</div>
     <div class="calcgrid">
       ${[7,8,9,4,5,6,1,2,3].map(n=>`<button class="calcbtn" onclick="calcPress(${n})">${n}</button>`).join('')}
@@ -1043,20 +1113,30 @@ function renderCalc(){
       <button class="calcbtn" onclick="calcPress(0)">0</button>
       <button class="calcbtn" onclick="calcBack()">⌫</button>
     </div>
-    <div class="row"><button class="btn green" onclick="calcSubmit()">✔ Give change</button></div>`;
+    <div class="row"><button class="btn green" onclick="calcSubmit()">✔ ${isTotal?'Check total':'Give change'}</button></div>`;
 }
-function calcPress(d){if(!calcState)return;if(calcState.value.length<3)calcState.value+=String(d);sfx.pop();renderCalc();}
+function calcPress(d){if(!calcState)return;if(calcState.value.length<4)calcState.value+=String(d);sfx.pop();renderCalc();}
 function calcClear(){if(!calcState)return;calcState.value='';renderCalc();}
 function calcBack(){if(!calcState)return;calcState.value=calcState.value.slice(0,-1);renderCalc();}
 function calcSubmit(){
   if(!calcState)return;
   const g=S.guests[calcState.gid];if(!g)return;
   const val=calcState.value===''?-1:Number(calcState.value);
-  if(val===calcState.correct){
-    sfx.ok();confetti(20);
-    $('qFeedback').innerHTML=`🎉 Correct! ${calcState.correct} 🪙 change given.`;
-    const gg=g;calcState=null;
-    setTimeout(()=>{closeQuiz();payBill(gg)},1000);
+  const isTotal=calcState.stage==='total';
+  const correct=isTotal?calcState.correctTotal:calcState.correctChange;
+  if(val===correct){
+    sfx.ok();
+    if(isTotal){
+      confetti(12);
+      $('qFeedback').innerHTML=`🎉 Correct total: ${correct} 🪙! Now count the change.`;
+      calcState.stage='change';calcState.value='';
+      setTimeout(()=>{if(!calcState)return;renderReceiptStage();$('qFeedback').innerHTML='';renderCalc()},1100);
+    }else{
+      confetti(20);
+      $('qFeedback').innerHTML=`🎉 Correct change! ${correct} 🪙 back.`;
+      const gg=g;calcState=null;
+      setTimeout(()=>{closeQuiz();payBill(gg)},1000);
+    }
   }else{
     calcState.wrong++;
     const penalty=[10,20,30][Math.min(calcState.wrong,3)-1];
@@ -1125,6 +1205,7 @@ function tick(){
   if(isOpen()){
     S.spawnIn-=1;
     if(S.spawnIn<=0){spawnGuest();S.spawnIn=nextSpawn()}
+    tryBreak();
   }
   if(S.bellCd>0)S.bellCd--;
   if(S.happy<100)S.happy=Math.min(100,S.happy+.04);
