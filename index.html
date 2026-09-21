@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Grand Hotel: The G-Sound Adventure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2b1a12; --gold:#f5b921; --gold-d:#b9770e; --red:#e5484d; --green:#2fb36d;
+    --blue:#3b82f6; --purple:#8b5cf6; --wood:#8a4b1c; --wood-d:#4d2c0e;
+    --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+    --nav-h:78px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Fredoka','Nunito',system-ui,sans-serif; color:var(--ink);
+    background:linear-gradient(180deg,#7ec8f2 0%,#bfe6fb 55%,#e9f7d8 100%);
+    min-height:100vh; min-height:100dvh;
+    padding:calc(8px + var(--safe-t)) 8px calc(var(--nav-h) + var(--safe-b) + 20px);
+    overflow-x:hidden; user-select:none; -webkit-user-select:none;
+  }
+  button{font-family:inherit}
+  .cloud{position:fixed;background:#fff;border-radius:50px;opacity:.85;z-index:0;animation:drift linear infinite}
+  .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+  .cloud.c1{width:90px;height:28px;top:6%;left:-120px;animation-duration:60s}
+  .cloud.c1::before{width:40px;height:40px;top:-18px;left:12px}
+  .cloud.c1::after{width:50px;height:50px;top:-24px;left:38px}
+  .cloud.c2{width:120px;height:34px;top:16%;left:-160px;animation-duration:90s;animation-delay:-30s}
+  .cloud.c2::before{width:50px;height:50px;top:-22px;left:16px}
+  .cloud.c2::after{width:60px;height:60px;top:-30px;left:52px}
+  @keyframes drift{to{transform:translateX(calc(100vw + 300px))}}
+  .app{position:relative;z-index:1;max-width:1000px;margin:0 auto}
+
+  .hud{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;
+    background:linear-gradient(180deg,#fff6e0,#ffe6a6);border:4px solid var(--gold-d);border-radius:22px;
+    padding:8px 12px;box-shadow:0 6px 0 rgba(120,70,10,.35);margin-bottom:10px}
+  .brand{display:flex;align-items:center;gap:10px;min-width:0}
+  .brand .logo{font-size:2rem}
+  .brand h1{margin:0;font-size:clamp(1rem,3.6vw,1.6rem);line-height:1.05;color:#7a3e07;font-weight:700}
+  .brand p{margin:0;font-size:clamp(.65rem,2.2vw,.8rem);color:#9a6a2d;font-weight:600}
+  .stats{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .chip{display:flex;align-items:center;gap:6px;background:#fff;border:3px solid #f1c66a;border-radius:16px;
+    padding:4px 10px;font-weight:700;font-size:clamp(.85rem,2.6vw,1.05rem)}
+  .chip small{display:block;font-size:.6rem;color:#a07a3a;letter-spacing:.02em;line-height:1}
+  .chip .v{line-height:1.1}
+  .chip.clockchip{background:#2b1a12;color:#ffe08a;border-color:#7a4a1e}
+  .chip.clockchip small{color:#d8b46a}
+  .btn{font-weight:700;border:0;cursor:pointer;border-radius:16px;padding:8px 12px;font-size:clamp(.8rem,2.6vw,.95rem);
+    color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.28);transition:transform .08s,box-shadow .08s}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.28)}
+  .btn.blue{background:var(--blue)} .btn.gold{background:var(--gold);color:#5a3200} .btn.green{background:var(--green)}
+  .btn.red{background:var(--red)} .btn.gray{background:#7b7f8c} .btn.purple{background:var(--purple)}
+  .btn.sm{padding:4px 10px;font-size:.75rem;border-radius:12px}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn:focus-visible,.nbtn:focus-visible,.gcard:focus-visible,.choice:focus-visible,.pick:focus-visible,.keybtn:focus-visible{outline:4px solid #1d4ed8;outline-offset:2px}
+
+  .mission{display:flex;align-items:center;gap:10px;background:#fff;border:3px solid #ffcf66;border-radius:18px;
+    padding:8px 12px;margin-bottom:10px;font-weight:600;font-size:clamp(.8rem,2.6vw,1rem)}
+  .mission .bar{flex:1;min-width:60px;height:14px;background:#f3e3bb;border-radius:10px;overflow:hidden;border:2px solid #e2c273}
+  .mission .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#34d399,#16a34a);transition:width .5s}
+
+  .page{display:none}
+  .page.active{display:block;animation:pageIn .35s ease-out}
+  @keyframes pageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .scene{border:8px solid var(--wood);border-radius:26px;overflow:hidden;background:#5d3216;
+    box-shadow:0 10px 0 rgba(70,35,10,.45),0 20px 30px rgba(0,0,0,.22)}
+  .scene-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 12px;
+    background:linear-gradient(180deg,#a0642a,#7a4a1e);color:#fff3d0;font-weight:700;border-bottom:4px solid var(--wood-d)}
+  .scene-head h2{margin:0;font-size:clamp(.95rem,3.4vw,1.3rem)}
+  .scene-head .tip{font-size:clamp(.65rem,2.2vw,.8rem);background:rgba(0,0,0,.25);border-radius:12px;padding:2px 10px;font-weight:600}
+  .wall{position:relative;padding:14px 12px 30px;min-height:120px;display:flex;align-items:flex-start;
+    justify-content:space-around;gap:8px;flex-wrap:wrap}
+  .wall::after{content:"";position:absolute;left:0;right:0;bottom:0;height:16px;
+    background:repeating-linear-gradient(90deg,#8b5a2b 0 26px,#7a4d22 26px 52px);border-top:3px solid #5b3a18}
+  .deco{font-size:clamp(1.8rem,7vw,2.8rem);filter:drop-shadow(0 3px 0 rgba(0,0,0,.2))}
+  .floorarea{position:relative;padding:14px 10px 18px;min-height:200px}
+  .hint{margin-top:12px;background:#fff;border:3px dashed #f0b64a;border-radius:16px;padding:8px 12px;
+    font-weight:600;font-size:clamp(.8rem,2.6vw,.95rem);text-align:center}
+
+  .lobby-wall{background:radial-gradient(circle at 50% 0%,rgba(255,244,190,.85),transparent 60%),
+    repeating-linear-gradient(90deg,#fbebc6 0 24px,#f3dba6 24px 48px)}
+  .lobby-floor,.cash-floor{background-color:#f4efe6;
+    background-image:conic-gradient(#e2d8c6 25%,#f4efe6 0 50%,#e2d8c6 0 75%,#f4efe6 0);background-size:56px 56px}
+  .keyrack{background:linear-gradient(180deg,#8a5a2b,#6b431c);border:3px solid var(--wood-d);border-radius:14px;
+    padding:4px 10px 6px;color:#ffe9b0;text-align:center;font-weight:700;font-size:.72rem}
+  .hooks{display:flex;gap:6px;margin-top:2px}
+  .hook{background:rgba(0,0,0,.25);border-radius:10px;padding:2px 6px;min-width:44px;font-size:1.25rem;line-height:1.2}
+  .hook small{display:block;font-size:.62rem}
+  .hook.free{outline:2px solid #ffd95a;animation:bob 2s ease-in-out infinite}
+  .hook.busy{opacity:.6} .hook.lock{opacity:.4}
+  .queue{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:flex-end;min-height:130px;padding-top:14px}
+  .emptyq{align-self:center;font-weight:700;color:#7a6a4a;text-align:center;padding:16px}
+  .deskfront{margin-top:14px;background:linear-gradient(180deg,#a0642a,#7a4a1e);border:4px solid var(--wood-d);
+    border-radius:16px;padding:8px 12px;display:flex;align-items:center;gap:10px;color:#fff;box-shadow:0 6px 0 rgba(0,0,0,.3)}
+  .deskfront .sign{background:#ffd95a;color:#5a3200;border-radius:10px;padding:2px 12px;font-weight:700;margin-left:auto}
+  .mgr{font-size:2.2rem;animation:bob 2.4s ease-in-out infinite}
+
+  .roof{height:34px;background:repeating-linear-gradient(90deg,#c0392b 0 28px,#a93226 28px 56px);
+    border-bottom:6px solid #7b241c;position:relative}
+  .roof::after{content:"GRAND HOTEL";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#ffe08a;
+    color:#7a3e07;font-weight:700;letter-spacing:.12em;font-size:.72rem;padding:2px 14px;border-radius:10px;border:2px solid var(--gold-d);white-space:nowrap}
+  .rfloor{position:relative;display:grid;grid-template-columns:1fr minmax(64px,22%) 1fr;min-height:200px;border-bottom:8px solid #6b3a17}
+  .rfloor.f3{background:linear-gradient(180deg,#e3c9f5,#d5b3ee)}
+  .rfloor.f2{background:linear-gradient(180deg,#bfe3f5,#9bd0ec);border-bottom:0}
+  .rfloor::after{content:"";position:absolute;left:0;right:0;bottom:0;height:10px;
+    background:repeating-linear-gradient(90deg,#8b5a2b 0 30px,#7a4d22 30px 60px)}
+  .floor-tag{position:absolute;top:6px;left:8px;z-index:3;font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:12px;
+    background:rgba(255,255,255,.92);border:2px solid rgba(0,0,0,.15)}
+  .rroom{position:relative;padding:34px 6px 16px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+    gap:4px;border-right:5px solid rgba(90,50,20,.55);min-width:0}
+  .rfloor .rroom:last-child{border-right:0}
+  .rroom.locked{filter:grayscale(.85) brightness(.85)}
+  .window{position:absolute;top:34px;right:8px;width:30px;height:30px;border-radius:8px;
+    background:linear-gradient(180deg,#a5e0ff,#e8f7ff);border:4px solid #fff;box-shadow:0 0 0 2px var(--wood);opacity:.85}
+  .room-num{background:#fff;border:2px solid var(--wood);border-radius:12px;font-weight:700;font-size:.7rem;padding:1px 10px;white-space:nowrap}
+  .rbody{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;text-align:center;min-height:80px;gap:2px}
+  .rbody .big{font-size:clamp(1.8rem,7vw,2.6rem);line-height:1}
+  .rbody .faded{opacity:.4}
+  .rbody .lbl{font-size:.7rem;font-weight:700}
+  .ract{min-height:30px;display:flex;align-items:center;justify-content:center}
+  .liftcol{position:relative;background:linear-gradient(90deg,#3a3f4b,#525a6b,#3a3f4b);border-left:5px solid var(--gold-d);
+    border-right:5px solid var(--gold-d);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 4px 18px;gap:6px}
+  .liftcol .cable{position:absolute;top:0;bottom:0;left:50%;width:4px;background:#222;transform:translateX(-50%);opacity:.5}
+  .cab{position:relative;z-index:2;width:80%;max-width:90px;height:64px;background:linear-gradient(180deg,#fdd35c,#e4a51b);
+    border:4px solid #7a3e07;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;
+    box-shadow:0 4px 0 rgba(0,0,0,.35);margin-bottom:auto;margin-top:46px}
+  .lift-label{position:relative;z-index:2;font-size:.6rem;color:#ffe08a;font-weight:700}
+
+  .gym-wall{background:linear-gradient(180deg,#6d4bb5,#4b2f8a)}
+  .mirror{flex:1;min-width:140px;height:72px;border-radius:14px;border:5px solid #d9b25a;
+    background:linear-gradient(135deg,#dff4ff,#9ed0ee 45%,#e8f8ff);box-shadow:inset 0 0 14px rgba(255,255,255,.7)}
+  .coach{display:flex;align-items:center;gap:8px;background:#fff;border:3px solid var(--purple);border-radius:16px;padding:4px 10px;
+    font-weight:700;font-size:.75rem;max-width:230px}
+  .coach .deco{font-size:2rem}
+  .gym-floor{background:repeating-linear-gradient(90deg,#3a3f4b 0 40px,#333844 40px 80px)}
+  .equips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .equip{background:rgba(0,0,0,.28);border:3px dashed rgba(255,255,255,.35);border-radius:18px;padding:8px 6px;min-height:170px;
+    display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:6px;color:#fff;text-align:center;font-weight:700;font-size:.72rem}
+  .equip .em{font-size:clamp(2rem,9vw,3rem)}
+  .equip.busy{border-style:solid;border-color:var(--purple);background:rgba(139,92,246,.25)}
+
+  .rest-wall{background:repeating-linear-gradient(90deg,#8e2d2d 0 26px,#7f2626 26px 52px)}
+  .kitchen{display:flex;gap:10px;align-items:center;background:#2b2b2b;border:5px solid #c9933b;border-radius:14px;padding:6px 12px;color:#ffe9b0;font-weight:700;font-size:.8rem}
+  .kitchen .deco{font-size:2rem}
+  .menu{background:#2f3b2f;border:4px solid #8a5a2b;border-radius:10px;color:#fff;padding:4px 10px;font-size:.74rem;font-weight:600;line-height:1.35}
+  .rest-floor{background-color:#fff3dc;background-image:conic-gradient(#d8483f 25%,#fff3dc 0 50%,#d8483f 0 75%,#fff3dc 0);background-size:64px 64px}
+  .tables{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .tbl{background:rgba(255,255,255,.72);border-radius:20px;padding:8px;min-height:170px;display:flex;flex-direction:column;
+    align-items:center;justify-content:space-between;gap:6px;border:3px solid rgba(138,43,43,.35);font-weight:700;font-size:.72rem;text-align:center}
+  .cloth{width:90px;height:24px;border-radius:50%;background:repeating-conic-gradient(#e5484d 0 25%,#fff 0 50%) 0 0/16px 16px;border:3px solid #8a2b2b}
+  .tbl .em{font-size:2rem;opacity:.45}
+
+  .cash-wall{background:linear-gradient(180deg,#245e73,#1c4a5c)}
+  .register{display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#a0642a,#7a4a1e);border:4px solid var(--wood-d);
+    border-radius:16px;padding:6px 14px;color:#fff;font-weight:700}
+  .register .deco{font-size:2.2rem}
+  .income{background:#fff;color:#5a3200;border-radius:12px;padding:2px 12px;font-size:.85rem}
+
+  .gcard{position:relative;background:#fff;border:3px solid var(--wood);border-radius:18px;padding:8px 10px;text-align:center;
+    min-width:104px;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.25);transition:transform .12s;animation:pop .35s;color:var(--ink)}
+  .gcard:hover{transform:translateY(-3px)}
+  .gcard .em{font-size:clamp(2rem,9vw,2.8rem);display:block;line-height:1.15;animation:bob 2s ease-in-out infinite}
+  .gcard .nm{font-weight:700;font-size:.8rem;display:block}
+  .gcard .glabel{font-size:.62rem;font-weight:700;margin-top:3px;color:#7a3e07;line-height:1.15}
+  .gcard .ask{position:absolute;top:-16px;right:-8px;background:#fff;border:3px solid var(--gold);border-radius:14px;padding:0 6px;
+    font-size:1.3rem;animation:bob 1.6s ease-in-out infinite}
+  .gcard.mini{min-width:0;width:100%;padding:6px 4px}
+  .gcard.urgent{border-color:var(--red);animation:pulseRed 1s infinite}
+  .pat{height:8px;background:rgba(0,0,0,.18);border-radius:6px;overflow:hidden;margin-top:4px}
+  .pat i{display:block;height:100%;width:100%;transition:width 1s linear}
+  @keyframes bob{50%{transform:translateY(-5px)}}
+  @keyframes pop{from{transform:scale(.3);opacity:0}}
+  @keyframes pulseRed{50%{box-shadow:0 0 0 8px rgba(229,72,77,.28)}}
+
+  .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:10px 8px calc(6px + var(--safe-b));
+    background:linear-gradient(180deg,#7a4a1e,#4d2c0e);border-top:4px solid var(--gold);box-shadow:0 -6px 16px rgba(0,0,0,.3)}
+  .nav-in{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .nbtn{position:relative;border:0;border-radius:16px;padding:6px 2px 5px;background:#fff1cf;color:#5a3200;font-weight:700;
+    cursor:pointer;display:flex;flex-direction:column;align-items:center;box-shadow:0 4px 0 rgba(0,0,0,.35);
+    transition:transform .12s,box-shadow .12s;min-width:0}
+  .nbtn .ic{font-size:clamp(1.3rem,6vw,1.9rem);line-height:1.1}
+  .nbtn .lb{font-size:clamp(.55rem,2.5vw,.85rem);line-height:1.1;text-align:center;display:flex;flex-direction:column}
+  .nbtn .lb small{font-size:.85em;opacity:.7;font-weight:600}
+  .nbtn.on{background:linear-gradient(180deg,#ffd95a,#f5b921);transform:translateY(-8px);box-shadow:0 9px 0 rgba(0,0,0,.35)}
+  .badge{position:absolute;top:-8px;right:-3px;min-width:22px;height:22px;border-radius:11px;background:var(--red);color:#fff;
+    font-size:.75rem;display:none;align-items:center;justify-content:center;padding:0 5px;border:2px solid #fff}
+  .badge.show{display:flex}
+  .badge.urgent{animation:pulseRed 1s infinite}
+
+  .overlay{position:fixed;inset:0;background:rgba(20,10,40,.72);z-index:50;display:none;align-items:center;justify-content:center;padding:12px}
+  .overlay.open{display:flex}
+  .card{background:linear-gradient(180deg,#fffaf0,#ffefc8);border:6px solid var(--gold-d);border-radius:26px;width:100%;max-width:520px;
+    max-height:92vh;max-height:92dvh;overflow:auto;padding:16px;box-shadow:0 12px 0 rgba(0,0,0,.3);animation:pop .3s}
+  .card h2{margin:0 0 4px;text-align:center;color:#7a3e07;font-size:clamp(1.1rem,4vw,1.5rem)}
+  .card .sub{text-align:center;font-size:.85rem;color:#8a6a3a;margin-bottom:10px;font-weight:600}
+  .hidden{display:none!important}
+  .prompt-word{text-align:center;margin:8px 0}
+  .prompt-word .emoji{font-size:clamp(3rem,16vw,5rem);line-height:1}
+  .prompt-word .word{font-size:clamp(1.8rem,9vw,3rem);font-weight:700;letter-spacing:.03em;color:#3b2a1a}
+  .prompt-word .word b{color:var(--red);text-decoration:underline;text-decoration-thickness:4px}
+  .prompt-word .word.masked{color:#b9a27a;letter-spacing:.2em}
+  .ask-line{text-align:center;font-weight:700;margin:6px 0 10px}
+  .hcol{color:#2563eb} .scol{color:#7c3aed}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .choice{border:0;border-radius:20px;padding:14px 8px;font-weight:700;cursor:pointer;color:#fff;box-shadow:0 6px 0 rgba(0,0,0,.3);
+    font-size:clamp(.95rem,3.4vw,1.2rem);transition:transform .08s,box-shadow .08s}
+  .choice:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.3)}
+  .choice.hard{background:linear-gradient(180deg,#4f9bff,#2563eb)} .choice.soft{background:linear-gradient(180deg,#b28aff,#7c3aed)}
+  .choice small{display:block;font-weight:600;opacity:.9;font-size:.72rem}
+  .choice.right{background:linear-gradient(180deg,#4ade80,#16a34a)!important}
+  .choice.wrong{background:linear-gradient(180deg,#f87171,#dc2626)!important;animation:shake .4s}
+  .choice:disabled{opacity:.6}
+  .picks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .pick{border:3px solid #e2c273;background:#fff;border-radius:16px;padding:8px 4px;cursor:pointer;display:flex;flex-direction:column;
+    align-items:center;gap:2px;box-shadow:0 5px 0 rgba(0,0,0,.2);color:var(--ink);min-width:0}
+  .pick .e{font-size:clamp(1.6rem,8vw,2.4rem)} .pick .w{font-weight:700;font-size:clamp(.85rem,3.4vw,1.1rem)} .pick .w b{color:var(--red)}
+  .pick.right{background:#bbf7d0;border-color:#16a34a}
+  .pick.wrong{background:#fecaca;border-color:#dc2626;animation:shake .4s}
+  @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .feedback{min-height:44px;text-align:center;font-weight:700;margin-top:10px;font-size:.95rem}
+  .rule{background:#fff;border-radius:14px;padding:8px 10px;font-size:.8rem;margin-top:8px;border:2px solid #f0d9a0}
+  .rule b.h{color:#2563eb} .rule b.s{color:#7c3aed}
+  .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+  .receipt{background:#fff;border:3px dashed #d8b46a;border-radius:14px;padding:8px 10px;margin:6px 0;font-size:.8rem;font-weight:600}
+  .receipt .rc{display:flex;justify-content:space-between;gap:8px;padding:2px 6px;border-radius:8px}
+  .receipt .rc.done{background:#dcfce7} .receipt .rc.now{background:#fff3c4;font-weight:700}
+  .receipt .tot{border-top:2px solid #d8b46a;margin-top:4px;padding-top:4px;text-align:right;font-weight:700}
+  .keys{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .keybtn{border:3px solid #e2c273;background:#fff;border-radius:18px;padding:10px 6px;cursor:pointer;display:flex;flex-direction:column;
+    align-items:center;gap:2px;box-shadow:0 5px 0 rgba(0,0,0,.2);color:var(--ink);font-size:.95rem}
+  .keybtn .k{font-size:1.8rem} .keybtn small{font-weight:600;font-size:.7rem;color:#7a6a4a}
+  .keybtn.vip{border-color:#c4b5fd}
+  .keybtn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+  .tabs{display:flex;gap:6px;margin-bottom:8px}
+  .tab{flex:1;padding:8px;border-radius:14px;border:3px solid #e2c273;background:#fff;font-weight:700;cursor:pointer}
+  .tab.on{background:var(--gold);border-color:var(--gold-d)}
+  .wordgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+  .wcard{background:#fff;border:3px solid #eadbb0;border-radius:14px;padding:6px;text-align:center;cursor:pointer;position:relative}
+  .wcard:active{transform:scale(.96)}
+  .wcard .e{font-size:1.8rem;display:block} .wcard .w{font-weight:700;font-size:.95rem} .wcard .w b{color:var(--red)}
+  .wcard .p{font-size:.68rem;color:#7a6a4a;font-family:'Nunito',sans-serif;font-weight:800}
+  .wcard .star{position:absolute;top:2px;right:4px;font-size:.8rem}
+  .upg{display:flex;align-items:center;gap:10px;background:#fff;border:3px solid #eadbb0;border-radius:16px;padding:8px 10px;margin-bottom:8px}
+  .upg .e{font-size:1.8rem} .upg .t{flex:1;font-weight:700;font-size:.9rem} .upg .t small{display:block;font-weight:600;color:#8a6a3a;font-size:.72rem}
+  .swatches{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+  .swatch{width:44px;height:44px;border-radius:50%;border:4px solid #fff;box-shadow:0 0 0 3px #d8b46a,0 4px 0 rgba(0,0,0,.2);cursor:pointer}
+  .swatch.on{box-shadow:0 0 0 3px #2563eb,0 4px 0 rgba(0,0,0,.2)}
+  .nameinput{width:100%;padding:10px 12px;border-radius:14px;border:3px solid #e2c273;font-size:1rem;font-family:inherit;font-weight:700;text-align:center;margin-top:4px;box-sizing:border-box}
+  .calcDisplay{text-align:center;font-size:clamp(1.6rem,7vw,2.2rem);font-weight:800;background:#fff;border:3px solid #e2c273;border-radius:14px;padding:10px;margin:8px 0;color:#3b2a1a}
+  .calcgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .calcbtn{border:3px solid #e2c273;background:#fff;border-radius:14px;padding:14px 0;font-size:1.3rem;font-weight:800;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2);color:var(--ink)}
+  .calcbtn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.2)}
+
+  .toast-wrap{position:fixed;left:0;right:0;top:calc(10px + var(--safe-t));display:flex;flex-direction:column;align-items:center;gap:6px;z-index:80;pointer-events:none}
+  .toast{background:#fff;border:3px solid var(--gold-d);border-radius:16px;padding:6px 14px;font-weight:700;font-size:.9rem;
+    box-shadow:0 5px 0 rgba(0,0,0,.25);animation:toast 2.6s forwards;max-width:92vw;text-align:center}
+  @keyframes toast{0%{transform:translateY(-30px);opacity:0}12%,80%{transform:none;opacity:1}100%{transform:translateY(-20px);opacity:0}}
+  .float{position:fixed;font-weight:800;font-size:1.4rem;z-index:90;pointer-events:none;animation:floatUp 1.2s forwards;color:#f59e0b;text-shadow:0 2px 0 #fff}
+  @keyframes floatUp{to{transform:translateY(-70px);opacity:0}}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;z-index:95;pointer-events:none;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+
+  @media (min-width:700px){
+    .tables{grid-template-columns:repeat(4,1fr)}
+    :root{--nav-h:88px}
+    .nbtn{flex-direction:row;justify-content:center;gap:10px;padding:8px 6px}
+    .nbtn .lb{text-align:left}
+  }
+  @media (max-width:640px){
+    .brand p{display:none}
+    .rfloor{min-height:190px}
+    .window{display:none}
+    .floor-tag{font-size:.6rem;padding:2px 7px}
+    .gcard{min-width:92px}
+    .equips{gap:6px} .equip{padding:6px 2px;font-size:.62rem}
+    .tbl{font-size:.62rem}
+  }
+  @media (max-width:420px){
+    .stats .chip small{display:none}
+    .btn .txt{display:none}
+    :root{--nav-h:72px}
+  }
+  @media (max-height:480px) and (orientation:landscape){
+    :root{--nav-h:58px}
+    .nbtn .lb small{display:none}
+    .nbtn .ic{font-size:1.2rem}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="cloud c1"></div><div class="cloud c2"></div>
+
+<div class="app">
+  <header class="hud">
+    <div class="brand">
+      <span class="logo">🏨</span>
+      <div><h1 id="hotelTitle">Grand Hotel: G-Sounds</h1><p>Hard G /ɡ/ or Soft G /dʒ/? Help the guests!</p></div>
+    </div>
+    <div class="stats">
+      <div class="chip">🪙<div><small>Coins</small><span class="v" id="coins">300</span></div></div>
+      <div class="chip"><span id="happyIcon">😊</span><div><small>Happy</small><span class="v" id="happy">100%</span></div></div>
+      <div class="chip">🔥<div><small>Streak</small><span class="v" id="streak">0</span></div></div>
+      <div class="chip clockchip">🕘<div><small id="dayLabel">Day 1/5</small><span class="v" id="clock">9:00 AM</span></div></div>
+      <button class="btn blue" onclick="openWords()" aria-label="Word book">📖<span class="txt"> Words</span></button>
+      <button class="btn gold" onclick="openUpgrades()" aria-label="Upgrades">🛠️<span class="txt"> Upgrades</span></button>
+      <button class="btn purple" onclick="openSettings()" aria-label="Settings">⚙️<span class="txt"> Theme</span></button>
+      <button class="btn gray" id="muteBtn" onclick="toggleMute()" aria-label="Sound on or off">🔊</button>
+    </div>
+  </header>
+
+  <div class="mission"><span id="missionText">🎯 Mission 1: Check out 5 guests (0/5)</span><div class="bar"><i id="missionBar"></i></div></div>
+
+  <main class="stage">
+    <section class="page active" id="page-lobby"></section>
+    <section class="page" id="page-rooms"></section>
+    <section class="page" id="page-gym"></section>
+    <section class="page" id="page-rest"></section>
+    <section class="page" id="page-cashier"></section>
+  </main>
+</div>
+
+<nav class="nav" aria-label="Hotel stations"><div class="nav-in">
+  <button class="nbtn on" data-p="lobby" onclick="showPage('lobby')"><span class="badge" id="b-lobby"></span><span class="ic">🛎️</span><span class="lb">Lobby<small>Check-in</small></span></button>
+  <button class="nbtn" data-p="rooms" onclick="showPage('rooms')"><span class="badge" id="b-rooms"></span><span class="ic">🛏️</span><span class="lb">Rooms<small>Service</small></span></button>
+  <button class="nbtn" data-p="gym" onclick="showPage('gym')"><span class="badge" id="b-gym"></span><span class="ic">🏋️</span><span class="lb">Gym<small>Workout</small></span></button>
+  <button class="nbtn" data-p="rest" onclick="showPage('rest')"><span class="badge" id="b-rest"></span><span class="ic">🍽️</span><span class="lb">Restaurant<small>Dining</small></span></button>
+  <button class="nbtn" data-p="cashier" onclick="showPage('cashier')"><span class="badge" id="b-cashier"></span><span class="ic">💳</span><span class="lb">Cashier<small>Check-out</small></span></button>
+</div></nav>
+
+<div class="overlay" id="ov-quiz"><div class="card">
+  <h2 id="qTitle">Word challenge</h2>
+  <div class="sub" id="qSub">Which G sound do you hear?</div>
+  <div class="receipt hidden" id="qReceipt"></div>
+  <div id="qBody"></div>
+  <div class="feedback" id="qFeedback"></div>
+  <div class="rule" id="qRule">
+    <b class="h">Hard G /ɡ/</b> → g + a, o, u (<i>game, goat, gum</i>)<br>
+    <b class="s">Soft G /dʒ/</b> → g + e, i, y (<i>gem, giant, gym</i>)
+  </div>
+  <div class="row"><button class="btn gray" onclick="closeQuiz()">✖ Close</button></div>
+</div></div>
+
+<div class="overlay" id="ov-dict"><div class="card">
+  <h2>📖 Word Book</h2>
+  <div class="sub" id="dictSub">Tap a word to hear it!</div>
+  <div class="tabs">
+    <button class="tab on" id="tabAll" onclick="renderDict('all')">All</button>
+    <button class="tab" id="tabHard" onclick="renderDict('hard')">Hard G</button>
+    <button class="tab" id="tabSoft" onclick="renderDict('soft')">Soft G</button>
+  </div>
+  <div class="wordgrid" id="dictGrid"></div>
+  <div class="row"><button class="btn gray" onclick="closeOverlay('dict')">✖ Close</button></div>
+</div></div>
+
+<div class="overlay" id="ov-upg"><div class="card">
+  <h2>🛠️ Hotel Upgrades</h2>
+  <div class="sub">Spend coins to make your hotel awesome!</div>
+  <div id="upgList"></div>
+  <div class="row">
+    <button class="btn red" id="resetBtn" onclick="resetGame(this)">↺ Reset game</button>
+    <button class="btn gray" onclick="closeOverlay('upg')">✖ Close</button>
+  </div>
+</div></div>
+
+<div class="overlay" id="ov-settings"><div class="card">
+  <h2>⚙️ Hotel Settings</h2>
+  <div class="sub">Make this hotel your own!</div>
+  <input class="nameinput" id="nameInput" maxlength="24" placeholder="Hotel name">
+  <div class="sub" style="margin-top:10px">Pick a theme color</div>
+  <div class="swatches" id="swatchRow"></div>
+  <div class="row"><button class="btn green" onclick="saveSettings()">✔ Save</button><button class="btn gray" onclick="closeOverlay('settings')">✖ Close</button></div>
+</div></div>
+
+<div class="overlay" id="ov-win"><div class="card" style="text-align:center">
+  <div style="font-size:4rem">🏆</div>
+  <h2>Mission complete!</h2>
+  <div class="sub" id="winText"></div>
+  <div class="row"><button class="btn green" onclick="closeOverlay('win')">Keep playing</button></div>
+</div></div>
+
+<div class="overlay" id="ov-day"><div class="card" style="text-align:center">
+  <div style="font-size:4rem" id="dayIcon">🌙</div>
+  <h2 id="dayTitle">Closing time!</h2>
+  <div class="sub" id="dayText"></div>
+  <div class="row"><button class="btn green" id="dayBtn" onclick="closeOverlay('day')">Continue</button></div>
+</div></div>
+
+<div class="toast-wrap" id="toasts" aria-live="polite"></div>
+
+<script>
+"use strict";
+const WORDS=[
+  {w:"game",e:"🎮",t:"hard",ip:"/ɡeɪm/",h:"g + a → Hard G"},
+  {w:"goat",e:"🐐",t:"hard",ip:"/ɡoʊt/",h:"g + o → Hard G"},
+  {w:"gum",e:"🍬",t:"hard",ip:"/ɡʌm/",h:"g + u → Hard G"},
+  {w:"gift",e:"🎁",t:"hard",ip:"/ɡɪft/",h:"g + i, but a special Hard G word!"},
+  {w:"garden",e:"🌻",t:"hard",ip:"/ˈɡɑːrdn/",h:"g + a → Hard G"},
+  {w:"grape",e:"🍇",t:"hard",ip:"/ɡreɪp/",h:"g + r → Hard G"},
+  {w:"green",e:"🟢",t:"hard",ip:"/ɡriːn/",h:"g + r → Hard G"},
+  {w:"gold",e:"🥇",t:"hard",ip:"/ɡoʊld/",h:"g + o → Hard G"},
+  {w:"guitar",e:"🎸",t:"hard",ip:"/ɡɪˈtɑːr/",h:"g + u → Hard G"},
+  {w:"goose",e:"🪿",t:"hard",ip:"/ɡuːs/",h:"g + o → Hard G"},
+  {w:"gate",e:"🚪",t:"hard",ip:"/ɡeɪt/",h:"g + a → Hard G"},
+  {w:"garlic",e:"🧄",t:"hard",ip:"/ˈɡɑːrlɪk/",h:"g + a → Hard G"},
+  {w:"glass",e:"🥛",t:"hard",ip:"/ɡlæs/",h:"g + l → Hard G"},
+  {w:"gorilla",e:"🦍",t:"hard",ip:"/ɡəˈrɪlə/",h:"g + o → Hard G"},
+  {w:"gas",e:"⛽",t:"hard",ip:"/ɡæs/",h:"g + a → Hard G"},
+  {w:"gem",e:"💎",t:"soft",ip:"/dʒem/",h:"g + e → Soft G"},
+  {w:"giant",e:"🧌",t:"soft",ip:"/ˈdʒaɪənt/",h:"g + i → Soft G"},
+  {w:"giraffe",e:"🦒",t:"soft",ip:"/dʒəˈræf/",h:"g + i → Soft G"},
+  {w:"ginger",e:"🫚",t:"soft",ip:"/ˈdʒɪndʒər/",h:"g + i → Soft G"},
+  {w:"gym",e:"🏋️",t:"soft",ip:"/dʒɪm/",h:"g + y → Soft G"},
+  {w:"gentle",e:"🕊️",t:"soft",ip:"/ˈdʒentl/",h:"g + e → Soft G"},
+  {w:"magic",e:"🪄",t:"soft",ip:"/ˈmædʒɪk/",h:"g + i → Soft G"},
+  {w:"orange",e:"🍊",t:"soft",ip:"/ˈɔːrɪndʒ/",h:"-ge at the end → Soft G"},
+  {w:"cage",e:"🐦",t:"soft",ip:"/keɪdʒ/",h:"-ge at the end → Soft G"},
+  {w:"page",e:"📄",t:"soft",ip:"/peɪdʒ/",h:"-ge at the end → Soft G"},
+  {w:"gerbil",e:"🐹",t:"soft",ip:"/ˈdʒɜːrbəl/",h:"g + e → Soft G"},
+  {w:"energy",e:"⚡",t:"soft",ip:"/ˈenərdʒi/",h:"g + y → Soft G"},
+  {w:"stage",e:"🎭",t:"soft",ip:"/steɪdʒ/",h:"-ge at the end → Soft G"},
+  {w:"bridge",e:"🌉",t:"soft",ip:"/brɪdʒ/",h:"-dge → Soft G"},
+  {w:"legend",e:"📜",t:"soft",ip:"/ˈledʒənd/",h:"g + e → Soft G"}
+];
+const FOOD=["grape","garlic","gum","glass","ginger","orange"];
+const GUEST_POOL=[
+  {e:"🐻",n:"Mr. Bear"},{e:"🐰",n:"Bunny"},{e:"🦊",n:"Mrs. Fox"},{e:"🐼",n:"Panda"},
+  {e:"🦁",n:"Leo"},{e:"🐸",n:"Froggy"},{e:"🐧",n:"Pip"},{e:"🐯",n:"Tigger"},
+  {e:"🐨",n:"Koala"},{e:"🐵",n:"Momo"},{e:"🦄",n:"Sparkle"},{e:"🐙",n:"Ollie"}
+];
+const ROOM_DEF={
+  '201':{floor:2,price:0,fee:40,name:'Deluxe'},
+  '202':{floor:2,price:0,fee:40,name:'Deluxe'},
+  '301':{floor:3,price:250,fee:80,name:'VIP'},
+  '302':{floor:3,price:400,fee:80,name:'VIP'}
+};
+const GYM_EQ=[{e:"🏃",n:"Treadmill"},{e:"🚴",n:"Bike"},{e:"🏋️",n:"Weights"}];
+const GYM_SLOTS=3, TABLES=4;
+const RATE={checkin:1.4,room:2,gym:2,rest:2,checkout:1.4};
+const PAGES=['lobby','rooms','gym','rest','cashier'];
+const THEMES=[
+  {k:'gold',gold:'#f5b921',goldd:'#b9770e',blue:'#3b82f6'},
+  {k:'rose',gold:'#ff8fab',goldd:'#d94f79',blue:'#3b82f6'},
+  {k:'mint',gold:'#4fd1a5',goldd:'#1f9d76',blue:'#3b82f6'},
+  {k:'sky',gold:'#5ec6ff',goldd:'#1d8fd1',blue:'#8b5cf6'},
+  {k:'sun',gold:'#ffcf40',goldd:'#e08e00',blue:'#e5484d'}
+];
+const OPEN_MIN=9*60, CLOSE_MIN=16*60, MAX_DAYS=5, MIN_PER_TICK=3;
+
+const S={
+  coins:300,happy:100,streak:0,best:0,checkouts:0,mission:5,income:0,
+  guests:{},nextId:1,
+  rooms:{'201':{unlocked:true,guest:null},'202':{unlocked:true,guest:null},'301':{unlocked:false,guest:null},'302':{unlocked:false,guest:null}},
+  upg:{speed:0,patience:0,bonus:0},learn:{},
+  page:'lobby',mute:false,liftFloor:2,spawnIn:1,bellCd:0,_t:0,_noSave:false,
+  hotelName:'Grand Hotel: G-Sounds',theme:'gold',
+  day:1,timeMin:OPEN_MIN,gameOver:false
+};
+let CH=null, TOK=0, tickTimer=null;
+
+const $=id=>document.getElementById(id);
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const hl=w=>w.replace(/g/i,m=>`<b>${m}</b>`);
+const G=()=>Object.values(S.guests);
+const at=loc=>G().filter(g=>g.loc===loc);
+const freeRooms=()=>Object.keys(S.rooms).filter(id=>S.rooms[id].unlocked&&!S.rooms[id].guest);
+const patColor=p=>p<30?'#e5484d':p<60?'#f5b921':'#2fb36d';
+const billTotal=g=>g.bill.reduce((s,b)=>s+b.price,0);
+function freeSlot(loc,max){const used=at(loc).map(g=>g.slot);for(let i=0;i<max;i++)if(!used.includes(i))return i;return -1}
+const isOpen=()=>!S.gameOver&&S.timeMin<CLOSE_MIN;
+function fmtTime(min){let h=Math.floor(min/60),m=Math.round(min%60);if(m===60){m=0;h++}
+  const ap=h>=12?'PM':'AM';let hh=h%12;if(hh===0)hh=12;return hh+':'+String(m).padStart(2,'0')+' '+ap}
+
+let actx=null;
+function beep(freq,dur=.12,type='sine',vol=.15,delay=0){
+  if(S.mute)return;
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==='suspended')actx.resume();
+    const t=actx.currentTime+delay,o=actx.createOscillator(),g=actx.createGain();
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+    o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+dur);
+  }catch(e){}
+}
+const sfx={
+  ok(){beep(523,.1,'triangle');beep(659,.1,'triangle',.15,.1);beep(784,.18,'triangle',.15,.2)},
+  bad(){beep(220,.25,'sawtooth',.1)},
+  coin(){beep(988,.08,'square',.08);beep(1319,.15,'square',.08,.08)},
+  bell(){beep(1568,.5,'sine',.2);beep(2093,.6,'sine',.12,.05)},
+  pop(){beep(440,.06,'sine',.1)}
+};
+const canSpeak=()=>!S.mute&&('speechSynthesis' in window)&&typeof SpeechSynthesisUtterance!=='undefined';
+function speakList(list){
+  if(!canSpeak())return;
+  try{
+    speechSynthesis.cancel();
+    list.forEach(t=>{const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=.8;u.pitch=1.1;speechSynthesis.speak(u)});
+  }catch(e){}
+}
+const speak=t=>speakList([t]);
+function toggleMute(){
+  S.mute=!S.mute;
+  $('muteBtn').textContent=S.mute?'🔇':'🔊';
+  if(S.mute&&'speechSynthesis' in window){try{speechSynthesis.cancel()}catch(e){}}
+  save();
+}
+
+function toast(msg){
+  const w=$('toasts');
+  while(w.children.length>=3)w.firstChild.remove();
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;w.appendChild(t);
+  setTimeout(()=>t.remove(),2600);
+}
+function floatText(txt){
+  const f=document.createElement('div');f.className='float';f.textContent=txt;
+  f.style.left=(window.innerWidth/2-30)+'px';f.style.top=(window.innerHeight/2)+'px';
+  document.body.appendChild(f);setTimeout(()=>f.remove(),1200);
+}
+function confetti(n=40){
+  const cols=['#f5b921','#e5484d','#3b82f6','#2fb36d','#8b5cf6','#ff8fab'];
+  for(let i=0;i<n;i++){
+    const c=document.createElement('div');c.className='confetti';
+    c.style.left=Math.random()*100+'vw';c.style.background=cols[i%cols.length];
+    c.style.animationDuration=(1.5+Math.random()*1.5)+'s';c.style.animationDelay=Math.random()*.4+'s';
+    document.body.appendChild(c);setTimeout(()=>c.remove(),3600);
+  }
+}
+function openOverlay(k){$('ov-'+k).classList.add('open')}
+function closeOverlay(k){$('ov-'+k).classList.remove('open')}
+const isPaused=()=>document.hidden||!!document.querySelector('.overlay.open');
+
+const SAVE_KEY='grandHotelG_v3';
+function save(){
+  if(S._noSave)return;
+  try{
+    localStorage.setItem(SAVE_KEY,JSON.stringify({
+      coins:S.coins,best:S.best,checkouts:S.checkouts,mission:S.mission,income:S.income,
+      upg:S.upg,learn:S.learn,mute:S.mute,hotelName:S.hotelName,theme:S.theme,
+      day:S.day,timeMin:S.timeMin,gameOver:S.gameOver,
+      unlocked:Object.keys(S.rooms).filter(id=>S.rooms[id].unlocked)
+    }));
+  }catch(e){}
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);if(!raw)return;
+    const d=JSON.parse(raw);
+    if(typeof d.coins==='number')S.coins=d.coins;
+    if(typeof d.best==='number')S.best=d.best;
+    if(typeof d.checkouts==='number')S.checkouts=d.checkouts;
+    if(typeof d.mission==='number')S.mission=d.mission;
+    if(typeof d.income==='number')S.income=d.income;
+    if(d.upg)Object.assign(S.upg,d.upg);
+    if(d.learn)S.learn=d.learn;
+    if(d.mute)S.mute=true;
+    if(typeof d.hotelName==='string'&&d.hotelName)S.hotelName=d.hotelName;
+    if(typeof d.theme==='string')S.theme=d.theme;
+    if(typeof d.day==='number')S.day=d.day;
+    if(typeof d.timeMin==='number')S.timeMin=d.timeMin;
+    if(typeof d.gameOver==='boolean')S.gameOver=d.gameOver;
+    if(Array.isArray(d.unlocked))d.unlocked.forEach(id=>{if(S.rooms[id])S.rooms[id].unlocked=true});
+  }catch(e){}
+}
+let resetArm=false;
+function resetGame(btn){
+  if(!resetArm){
+    resetArm=true;btn.textContent='Tap again to reset';
+    setTimeout(()=>{resetArm=false;btn.textContent='↺ Reset game'},3000);return;
+  }
+  S._noSave=true;
+  try{localStorage.removeItem(SAVE_KEY)}catch(e){}
+  location.reload();
+}
+
+function applyTheme(){
+  const t=THEMES.find(x=>x.k===S.theme)||THEMES[0];
+  document.documentElement.style.setProperty('--gold',t.gold);
+  document.documentElement.style.setProperty('--gold-d',t.goldd);
+  document.documentElement.style.setProperty('--blue',t.blue);
+  $('hotelTitle').textContent=S.hotelName;
+}
+function openSettings(){
+  $('nameInput').value=S.hotelName;
+  const row=$('swatchRow');row.innerHTML='';
+  THEMES.forEach(t=>{
+    const b=document.createElement('button');b.className='swatch'+(S.theme===t.k?' on':'');
+    b.style.background=`linear-gradient(135deg,${t.gold},${t.goldd})`;
+    b.onclick=()=>{S.theme=t.k;openSettings()};
+    row.appendChild(b);
+  });
+  openOverlay('settings');
+}
+function saveSettings(){
+  const v=$('nameInput').value.trim();
+  if(v)S.hotelName=v.slice(0,24);
+  applyTheme();sfx.ok();toast('Hotel updated! ✨');
+  closeOverlay('settings');save();
+}
+
+function updateHUD(){
+  $('coins').textContent=Math.floor(S.coins);
+  const h=Math.round(S.happy);
+  $('happy').textContent=h+'%';
+  $('happyIcon').textContent=h>=70?'😊':h>=40?'😐':'😟';
+  $('streak').textContent=S.streak;
+  $('clock').textContent=S.gameOver?'Closed':fmtTime(S.timeMin);
+  $('dayLabel').textContent=S.gameOver?'Hotel closed':`Day ${S.day}/${MAX_DAYS}`;
+  const done=Math.max(0,Math.min(5,S.checkouts-(S.mission-5)));
+  $('missionText').textContent=`🎯 Mission ${S.mission/5}: Check out 5 guests (${done}/5)`;
+  $('missionBar').style.width=(done/5*100)+'%';
+}
+function renderNav(){
+  const c={lobby:0,rooms:0,gym:0,rest:0,cashier:0},u={lobby:false,rooms:false,gym:false,rest:false,cashier:false};
+  G().forEach(g=>{
+    let k=null;
+    if(g.loc==='lobby')k='lobby';
+    else if(g.loc==='room'&&g.state==='need')k='rooms';
+    else if(g.loc==='gym')k='gym';
+    else if(g.loc==='rest')k='rest';
+    else if(g.loc==='cashier')k='cashier';
+    if(k){c[k]++;if(g.patience<35)u[k]=true}
+  });
+  PAGES.forEach(k=>{
+    const b=$('b-'+k);b.textContent=c[k];
+    b.classList.toggle('show',c[k]>0);b.classList.toggle('urgent',u[k]);
+  });
+  document.querySelectorAll('.nbtn').forEach(b=>{
+    const on=b.dataset.p===S.page;b.classList.toggle('on',on);
+    if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
+  });
+}
+function showPage(p){
+  if(!PAGES.includes(p))return;
+  S.page=p;
+  PAGES.forEach(k=>$('page-'+k).classList.toggle('active',k===p));
+  renderPage(p);renderNav();sfx.pop();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function renderPage(p){
+  ({lobby:renderLobby,rooms:renderRooms,gym:renderGym,rest:renderRest,cashier:renderCashier})[p]();
+}
+function renderAll(){renderNav();renderPage(S.page);updateHUD()}
+
+const hint=t=>`<div class="hint">${t}</div>`;
+function gcard(g,o){
+  const urgent=g.patience<30?' urgent':'';
+  return `<div class="gcard${o.mini?' mini':''}${urgent}" id="gc-${g.id}" role="button" tabindex="0"
+    onclick="tapGuest(${g.id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();tapGuest(${g.id})}">
+    ${o.ask?`<div class="ask">${o.ask}</div>`:''}
+    <span class="em">${g.e}</span><span class="nm">${g.n}</span>
+    <div class="pat"><i id="pat-${g.id}" style="width:${Math.max(0,g.patience)}%;background:${patColor(g.patience)}"></i></div>
+    <div class="glabel">${o.label}</div></div>`;
+}
+
+function renderLobby(){
+  const q=at('lobby');
+  const hooks=Object.keys(S.rooms).map(id=>{
+    const R=S.rooms[id],cls=!R.unlocked?'lock':R.guest?'busy':'free',ic=!R.unlocked?'🔒':R.guest?'🚫':'🔑';
+    return `<div class="hook ${cls}">${ic}<small>${id}</small></div>`;
+  }).join('');
+  const closedMsg=!isOpen()?hint(S.gameOver?'🏨 The hotel has closed for good — thanks for playing all 5 days!':'🌙 Closed for the night. Come back tomorrow at 9:00 AM!'):'';
+  $('page-lobby').innerHTML=`
+  <div class="scene">
+    <div class="scene-head"><h2>🛎️ Lobby · Check-in</h2><span class="tip">Read the luggage tag, then hand over a key</span></div>
+    <div class="wall lobby-wall">
+      <span class="deco">🖼️</span>
+      <div class="keyrack">Room keys<div class="hooks">${hooks}</div></div>
+      <span class="deco">🕰️</span>
+      <span class="deco">🪴</span>
+    </div>
+    <div class="floorarea lobby-floor">
+      <div class="queue">${q.length?q.map(g=>gcard(g,{ask:'🧳',label:g.verified?'🔑 Give a key!':'Tap to check in'})).join(''):
+        '<div class="emptyq">No guests waiting yet.<br>Ring the bell to call one! 🔔</div>'}</div>
+      <div class="deskfront"><span class="mgr">🧑‍✈️</span><b>Reception</b>
+        <button class="btn gold sm" onclick="ringBell()" ${isOpen()?'':'disabled'}>🔔 Ring bell</button><span class="sign">CHECK-IN</span></div>
+    </div>
+  </div>${closedMsg||hint('👆 Tap a waiting guest → answer the luggage tag → choose a room key 🔑')}`;
+}
+
+function roomHTML(id){
+  const R=S.rooms[id],D=ROOM_DEF[id];let inner='';
+  if(!R.unlocked){
+    inner=`<div class="rbody"><span class="big">🔒</span><span class="lbl">Locked</span></div>
+      <div class="ract"><button class="btn gold sm" onclick="buyRoom('${id}')">Unlock ${D.price} 🪙</button></div>`;
+  }else if(!R.guest){
+    inner=`<div class="rbody"><span class="big faded">🛏️</span><span class="lbl">Empty · ${D.fee}🪙</span></div><div class="ract"></div>`;
+  }else{
+    const g=S.guests[R.guest];
+    if(g.loc==='room'&&g.state==='need'){
+      inner=`<div class="rbody">${gcard(g,{mini:true,ask:g.word.e,label:'Room service! Tap'})}</div><div class="ract"></div>`;
+    }else if(g.loc==='room'){
+      inner=`<div class="rbody"><span class="big">${g.e}</span><span class="lbl">${g.n} 😴</span></div><div class="ract"></div>`;
+    }else{
+      const where={gym:'the Gym',rest:'the Restaurant',cashier:'the Cashier'}[g.loc]||'the hotel';
+      inner=`<div class="rbody"><span class="big faded">${g.e}</span><span class="lbl">🚶 ${g.n} is at ${where}</span></div><div class="ract"></div>`;
+    }
+  }
+  return `<div class="rroom${R.unlocked?'':' locked'}" id="room-${id}"><div class="window"></div><div class="room-num">${id} ${D.name}</div>${inner}</div>`;
+}
+function liftHTML(f){
+  return `<div class="liftcol"><div class="cable"></div>${S.liftFloor===f?'<div class="cab">🛗</div>':''}<div class="lift-label">Lift ${f}</div></div>`;
+}
+function renderRooms(){
+  $('page-rooms').innerHTML=`
+  <div class="scene">
+    <div class="scene-head"><h2>🛏️ Rooms</h2><span class="tip">Guests in their rooms ask for help</span></div>
+    <div class="roof"></div>
+    <section class="rfloor f3"><div class="floor-tag">👑 Floor 3 · VIP Penthouse</div>${roomHTML('301')}${liftHTML(3)}${roomHTML('302')}</section>
+    <section class="rfloor f2"><div class="floor-tag">✨ Floor 2 · Deluxe Rooms</div>${roomHTML('201')}${liftHTML(2)}${roomHTML('202')}</section>
+  </div>${hint('🛎️ Tap a guest with a speech bubble to help. Unlock VIP rooms to earn more!')}`;
+}
+
+function renderGym(){
+  const gs=at('gym');
+  const slots=GYM_EQ.map((m,i)=>{
+    const g=gs.find(x=>x.slot===i);
+    return g?`<div class="equip busy">${gcard(g,{mini:true,ask:g.word.e,label:'Find the Soft G!'})}<span>${m.e} ${m.n}</span></div>`
+            :`<div class="equip"><span class="em">${m.e}</span><span>${m.n}<br>Free</span></div>`;
+  }).join('');
+  $('page-gym').innerHTML=`
+  <div class="scene">
+    <div class="scene-head"><h2>🏋️ Gym · Soft G</h2><span class="tip">Guests work out — find the Soft G word</span></div>
+    <div class="wall gym-wall"><div class="mirror"></div>
+      <div class="coach"><span class="deco">🦸</span><span>Soft G power!<br>g + e, i, y</span></div></div>
+    <div class="floorarea gym-floor"><div class="equips">${slots}</div></div>
+  </div>${hint('💪 Tap a guest at a machine, then tap the word that has a SOFT G.')}`;
+}
+
+function renderRest(){
+  const gs=at('rest');
+  const tables=[...Array(TABLES).keys()].map(i=>{
+    const g=gs.find(x=>x.slot===i);
+    return g?`<div class="tbl">${gcard(g,{mini:true,ask:g.word.e,label:'Take the order'})}<div class="cloth"></div><span>Table ${i+1}</span></div>`
+            :`<div class="tbl"><span class="em">🪑</span><div class="cloth"></div><span>Table ${i+1}<br>Free</span></div>`;
+  }).join('');
+  $('page-rest').innerHTML=`
+  <div class="scene">
+    <div class="scene-head"><h2>🍽️ Restaurant</h2><span class="tip">Take orders and serve tasty food</span></div>
+    <div class="wall rest-wall">
+      <div class="kitchen"><span class="deco">👨‍🍳</span><span>Kitchen<br>open!</span><span class="deco">🍳</span></div>
+      <div class="menu"><b>Today's menu</b><br>🍇 grape · 🧄 garlic · 🍬 gum<br>🥛 glass · 🫚 ginger · 🍊 orange</div>
+    </div>
+    <div class="floorarea rest-floor"><div class="tables">${tables}</div></div>
+  </div>${hint('🍽️ Tap a guest to take their order. Is it a Hard G or a Soft G word?')}`;
+}
+
+function renderCashier(){
+  const q=at('cashier');
+  $('page-cashier').innerHTML=`
+  <div class="scene">
+    <div class="scene-head"><h2>💳 Cashier · Check-out</h2><span class="tip">Read the bill, then count the change</span></div>
+    <div class="wall cash-wall">
+      <span class="deco">🕰️</span>
+      <div class="register"><span class="deco">🧾</span><div>Cash register<br><span class="income">Earned today: ${S.income} 🪙</span></div></div>
+      <span class="deco">🪴</span>
+    </div>
+    <div class="floorarea cash-floor">
+      <div class="queue">${q.length?q.map(g=>gcard(g,{ask:'🧾',label:`Bill: ${billTotal(g)} 🪙 · Tap to pay`})).join(''):
+        '<div class="emptyq">No one is waiting to pay.<br>Guests come here when their stay is done 💳</div>'}</div>
+    </div>
+  </div>${hint('💳 Tap a guest → read every line of the bill → count the change!')}`;
+}
+
+function pickWord(kind,g){
+  let pool=WORDS;
+  if(kind==='gym')pool=WORDS.filter(w=>w.t==='soft');
+  else if(kind==='rest')pool=WORDS.filter(w=>FOOD.includes(w.w));
+  const used=g?g.bill.map(b=>b.word.w):[];
+  let cand=pool.filter(w=>!used.includes(w.w));
+  if(!cand.length)cand=pool;
+  return rnd(cand);
+}
+function pickMode(kind){
+  if(kind==='checkin')return 'sort';
+  if(kind==='gym')return rnd(['pick','match']);
+  const m=['sort','pick','match'];if(canSpeak())m.push('listen');
+  return rnd(m);
+}
+function canSpawn(){return isOpen()&&at('lobby').length<3&&freeRooms().length>at('lobby').length}
+function spawnGuest(){
+  if(!canSpawn())return false;
+  const names=G().map(g=>g.n);
+  let opts=GUEST_POOL.filter(a=>!names.includes(a.n));if(!opts.length)opts=GUEST_POOL;
+  const a=rnd(opts),w=pickWord('checkin');
+  const g={id:S.nextId++,e:a.e,n:a.n,loc:'lobby',slot:null,room:null,state:'need',kind:'checkin',
+    word:w,checkinWord:w,mode:'sort',patience:100,timer:0,served:0,target:2+Math.floor(Math.random()*2),
+    bill:[],verified:false,vip:false};
+  S.guests[g.id]=g;sfx.pop();renderAll();return true;
+}
+function nextSpawn(){return Math.round(Math.max(4,11-S.upg.speed*1.5)+Math.random()*4)}
+function ringBell(){
+  if(!isOpen()){toast(S.gameOver?'🏨 The hotel is closed for good.':'🌙 Closed for the night — open again at 9:00 AM.');return}
+  sfx.bell();
+  if(S.bellCd>0){toast('The bell is still ringing… wait a moment 🔔');return}
+  if(spawnGuest()){S.bellCd=4;toast('🔔 Ding! A guest arrived at the lobby.')}
+  else toast(freeRooms().length?'The lobby is full! Check someone in first.':'No free rooms — wait for a check-out or unlock a room.');
+}
+function buyRoom(id){
+  const p=ROOM_DEF[id].price;
+  if(S.coins<p){toast(`You need ${p} coins. Keep helping guests! 💪`);sfx.bad();return}
+  S.coins-=p;S.rooms[id].unlocked=true;sfx.coin();confetti(30);toast(`Room ${id} unlocked! 🎉`);
+  updateHUD();renderAll();save();
+}
+function tapGuest(id){
+  const g=S.guests[id];if(!g||g.state!=='need')return;
+  if(g.kind==='checkin'){
+    if(!freeRooms().length){toast('No free room! Unlock a room or wait for a check-out.');sfx.bad();return}
+    if(g.verified){openOverlay('quiz');showKeys(g)}
+    else startChallenge({kind:'checkin',gid:id},[{word:g.word,mode:'sort'}]);
+  }else if(g.kind==='checkout'){
+    CH=null;openOverlay('quiz');startChangeStep(g);
+  }else{
+    startChallenge({kind:g.kind,gid:id},[{word:g.word,mode:g.mode}]);
+  }
+}
+function giveKey(gid,rid){
+  const g=S.guests[gid],R=S.rooms[rid];
+  if(!g||!R||!R.unlocked||R.guest)return;
+  R.guest=g.id;g.room=rid;g.loc='room';g.state='idle';g.kind=null;g.word=null;
+  g.timer=3+Math.floor(Math.random()*3);g.patience=100;g.served=0;
+  g.vip=ROOM_DEF[rid].floor===3;
+  g.bill=[{icon:'🛏️',label:`Room ${rid}`,word:g.checkinWord,price:ROOM_DEF[rid].fee}];
+  S.liftFloor=ROOM_DEF[rid].floor;S.coins+=10;
+  closeQuiz();sfx.ok();confetti(20);toast(`🔑 ${g.n} is in Room ${rid}!`);
+  updateHUD();renderAll();save();
+}
+function nextActivity(g){
+  if(g.served>=g.target){goCashier(g);return}
+  const opts=['room'];
+  if(freeSlot('gym',GYM_SLOTS)>=0)opts.push('gym','gym');
+  if(freeSlot('rest',TABLES)>=0)opts.push('rest','rest');
+  const kind=rnd(opts);
+  g.kind=kind;g.state='need';g.patience=100;g.word=pickWord(kind,g);g.mode=pickMode(kind);
+  if(kind==='gym'){g.loc='gym';g.slot=freeSlot('gym',GYM_SLOTS)}
+  else if(kind==='rest'){g.loc='rest';g.slot=freeSlot('rest',TABLES)}
+  else S.liftFloor=ROOM_DEF[g.room].floor;
+  toast(`🔔 ${g.n} needs help ${kind==='room'?'in Room '+g.room:kind==='gym'?'at the Gym':'at the Restaurant'}!`);
+  sfx.pop();renderAll();
+}
+function serveGuest(g){
+  const price={room:15,gym:20,rest:25}[g.kind],icon={room:'🛎️',gym:'🏋️',rest:'🍽️'}[g.kind],
+        label={room:'Room service',gym:'Gym',rest:'Restaurant'}[g.kind],extra={room:5,gym:15,rest:10}[g.kind];
+  g.bill.push({icon,label,word:g.word,price});
+  S.coins+=extra+S.upg.bonus*3;S.happy=Math.min(100,S.happy+3);
+  g.served++;g.state='idle';g.kind=null;g.word=null;g.loc='room';g.slot=null;
+  g.timer=4+Math.floor(Math.random()*4);g.patience=100;
+  S.liftFloor=ROOM_DEF[g.room].floor;
+  sfx.coin();toast(`😊 ${g.n} is happy!`);updateHUD();renderAll();
+}
+function goCashier(g){
+  const R=S.rooms[g.room];if(R)R.guest=null;
+  g.room=null;g.loc='cashier';g.slot=null;g.state='need';g.kind='checkout';g.patience=100;
+  toast(`💳 ${g.n} is ready to check out!`);sfx.bell();renderAll();
+}
+function payBill(g){
+  if(!g)return;
+  const total=billTotal(g),tip=g.vip?30:15,sum=total+tip;
+  S.coins+=sum;S.income+=sum;S.checkouts++;S.happy=Math.min(100,S.happy+5);
+  delete S.guests[g.id];
+  floatText(`+${sum} 🪙`);confetti(30);sfx.coin();
+  toast(`💳 ${g.n} paid ${total} 🪙 + ${tip} 🪙 tip. Thank you!`);
+  checkMission();updateHUD();renderAll();save();
+}
+function guestLeaves(g){
+  S.streak=0;S.happy=Math.max(0,S.happy-8);
+  if(g.loc==='cashier'){const t=billTotal(g);S.coins+=t;S.income+=t;toast(`😕 ${g.n} paid ${t} 🪙 and left without a tip.`)}
+  else toast(`😢 ${g.n} got tired of waiting and left.`);
+  if(g.room&&S.rooms[g.room])S.rooms[g.room].guest=null;
+  delete S.guests[g.id];updateHUD();renderAll();
+}
+function checkMission(){
+  if(S.checkouts>=S.mission){
+    S.coins+=100;
+    $('winText').textContent=`Mission ${S.mission/5} done: you checked out ${S.mission} guests! +100 🪙. Next: 5 more guests.`;
+    S.mission+=5;confetti(80);sfx.ok();openOverlay('win');save();
+  }
+}
+
+function endOfDay(){
+  G().forEach(g=>{
+    const t=billTotal(g);S.coins+=t;S.income+=t;
+    if(g.room&&S.rooms[g.room])S.rooms[g.room].guest=null;
+    delete S.guests[g.id];
+  });
+  if(S.day>=MAX_DAYS){
+    S.gameOver=true;
+    $('dayIcon').textContent='🏨';$('dayTitle').textContent='The hotel has closed';
+    $('dayText').textContent=`You ran the hotel for ${MAX_DAYS} days and earned ${S.income} 🪙 in total. Great job learning your G sounds!`;
+    $('dayBtn').textContent='See word book';$('dayBtn').onclick=()=>{closeOverlay('day');openWords()};
+    if(tickTimer)clearInterval(tickTimer);
+  }else{
+    S.day++;S.timeMin=OPEN_MIN;
+    $('dayIcon').textContent='🌅';$('dayTitle').textContent=`Day ${S.day} begins!`;
+    $('dayText').textContent=`It's a new morning at ${S.hotelName}. The doors open at 9:00 AM.`;
+    $('dayBtn').textContent='Start the day';$('dayBtn').onclick=()=>closeOverlay('day');
+  }
+  openOverlay('day');updateHUD();renderAll();save();
+}
+
+function startChallenge(ctx,rounds){
+  CH={ctx,rounds,i:0,locked:false,tok:++TOK,wrongCount:0};
+  openOverlay('quiz');renderRound();
+}
+function receiptHTML(g){
+  const rows=CH.rounds.map((r,i)=>`<div class="rc ${i<CH.i?'done':i===CH.i?'now':''}"><span>${r.item.icon} ${r.item.label}</span><span>${r.item.price} 🪙 ${i<CH.i?'✔':''}</span></div>`).join('');
+  return rows+`<div class="tot">Total: ${billTotal(g)} 🪙</div>`;
+}
+function renderRound(){
+  const ctx=CH.ctx,g=S.guests[ctx.gid],r=CH.rounds[CH.i],w=r.word;
+  if(!g){closeQuiz();return}
+  if(r.noListen===undefined)r.noListen=Math.random()<0.3;
+  if(r.mode==='listen'&&(!canSpeak()||r.noListen))r.mode='sort';
+  CH.locked=false;
+  $('qRule').classList.remove('hidden');
+  $('qFeedback').innerHTML='';
+  const T={
+    checkin:[`Check-in: ${g.n}`,'Read the luggage tag 🧳'],
+    room:[`Room service for ${g.n}`,'Help the guest with this word'],
+    gym:[`Gym: ${g.n}`,'Find the Soft G word'],
+    rest:[`Restaurant: ${g.n}'s order`,'Which G sound is in the dish?'],
+    checkout:[`Cashier: ${g.n}'s bill`,`Bill line ${CH.i+1} of ${CH.rounds.length}`]
+  }[ctx.kind];
+  $('qTitle').textContent=T[0];$('qSub').textContent=r.noListen?T[1]+' · Read only, no audio! 👀':T[1];
+  const rc=$('qReceipt');
+  if(ctx.kind==='checkout'){rc.classList.remove('hidden');rc.innerHTML=receiptHTML(g)}else rc.classList.add('hidden');
+  const choices=`<div class="choices">
+      <button class="choice hard" id="chHard" onclick="typeAnswer('hard')">G as in <b>GO</b><small>Hard G /ɡ/</small></button>
+      <button class="choice soft" id="chSoft" onclick="typeAnswer('soft')">G as in <b>GEM</b><small>Soft G /dʒ/</small></button></div>`;
+  const listenBtn=(fn,label)=>r.noListen?'':`<div class="row"><button class="btn purple" onclick="${fn}">🔊 ${label}</button></div>`;
+  let body='';
+  if(r.mode==='pick'){
+    const opp=shuffle(WORDS.filter(x=>x.t!==w.t)).slice(0,2);
+    r.opts=shuffle([w,...opp]);
+    body=`<div class="ask-line">Tap the word with a <b class="${w.t==='hard'?'hcol':'scol'}">${w.t==='hard'?'Hard G /ɡ/':'Soft G /dʒ/'}</b></div>
+      <div class="picks">${r.opts.map(o=>`<button class="pick" onclick="pickAnswer('${o.w}',this)"><span class="e">${o.e}</span><span class="w">${hl(o.w)}</span></button>`).join('')}</div>
+      ${listenBtn('speakOptions()','Hear the words')}`;
+  }else if(r.mode==='match'){
+    const opp=shuffle(WORDS.filter(x=>x.w!==w.w)).slice(0,2);
+    r.opts=shuffle([w,...opp]);
+    body=`<div class="ask-line">Match the picture to its word</div>
+      <div class="prompt-word"><div class="emoji">${w.e}</div></div>
+      <div class="picks">${r.opts.map(o=>`<button class="pick" onclick="pickAnswer('${o.w}',this)"><span class="w">${hl(o.w)}</span><span class="p" style="font-size:.65rem;color:#7a6a4a">${o.ip}</span></button>`).join('')}</div>
+      ${listenBtn('speakOptions()','Hear the words')}`;
+  }else if(r.mode==='listen'){
+    body=`<div class="prompt-word"><div class="emoji">${w.e}</div><div class="word masked" id="qWord">? ? ?</div></div>
+      <div class="row"><button class="btn purple" onclick="speakCurrent()">🔊 Play the word</button></div>${choices}`;
+  }else{
+    body=`<div class="prompt-word"><div class="emoji">${w.e}</div><div class="word" id="qWord">${hl(w.w)}</div></div>
+      ${listenBtn('speakCurrent()','Listen')}${choices}`;
+  }
+  $('qBody').innerHTML=body;
+  if(!r.noListen){
+    const tok=CH.tok;
+    setTimeout(()=>{if(CH&&CH.tok===tok){r.mode==='pick'||r.mode==='match'?speakList(r.opts.map(o=>o.w)):speak(w.w)}},300);
+  }
+}
+function speakCurrent(){if(CH)speak(CH.rounds[CH.i].word.w)}
+function speakOptions(){if(CH){const r=CH.rounds[CH.i];if(r.opts)speakList(r.opts.map(o=>o.w))}}
+function typeAnswer(t){
+  if(!CH||CH.locked)return;
+  const r=CH.rounds[CH.i],w=r.word,btn=$(t==='hard'?'chHard':'chSoft');
+  if(r.mode==='listen'){const el=$('qWord');if(el){el.classList.remove('masked');el.innerHTML=hl(w.w)}}
+  if(t===w.t)roundCorrect(btn);else roundWrong(btn);
+}
+function pickAnswer(name,el){
+  if(!CH||CH.locked)return;
+  if(name===CH.rounds[CH.i].word.w)roundCorrect(el);else roundWrong(el);
+}
+function roundCorrect(btn){
+  CH.locked=true;const tok=CH.tok,w=CH.rounds[CH.i].word;
+  if(btn)btn.classList.add('right');
+  S.streak++;S.best=Math.max(S.best,S.streak);
+  const gain=8+S.upg.bonus*5+Math.min(S.streak,10);
+  S.coins+=gain;S.happy=Math.min(100,S.happy+2);S.learn[w.w]=(S.learn[w.w]||0)+1;
+  $('qFeedback').innerHTML=`🎉 Great job! <b>${w.w}</b> ${w.ip}<br>${w.h} · +${gain} 🪙`;
+  sfx.ok();confetti(16);updateHUD();
+  setTimeout(()=>{if(CH&&CH.tok===tok)nextRound()},1500);
+}
+function roundWrong(btn){
+  CH.locked=true;const tok=CH.tok,w=CH.rounds[CH.i].word;
+  if(btn)btn.classList.add('wrong');
+  S.streak=0;S.happy=Math.max(0,S.happy-2);
+  CH.wrongCount++;
+  const penalty=[10,20,30][Math.min(CH.wrongCount,3)-1];
+  S.coins=Math.max(0,S.coins-penalty);
+  $('qFeedback').innerHTML=`Oops! <b>${w.w}</b> has a <b>${w.t==='hard'?'Hard G /ɡ/':'Soft G /dʒ/'}</b>. -${penalty} 🪙<br>${w.h}. Try again! 💪`;
+  sfx.bad();updateHUD();
+  setTimeout(()=>{
+    if(!CH||CH.tok!==tok)return;
+    if(btn){btn.disabled=true;btn.classList.remove('wrong');btn.style.opacity='.4'}
+    CH.locked=false;if(!CH.rounds[CH.i].noListen)speak(w.w);
+  },1500);
+}
+function nextRound(){
+  CH.i++;
+  if(CH.i<CH.rounds.length){renderRound();return}
+  finishChallenge();
+}
+function finishChallenge(){
+  const ctx=CH.ctx,g=S.guests[ctx.gid];
+  if(!g){closeQuiz();return}
+  if(ctx.kind==='checkin'){g.verified=true;showKeys(g);return}
+  closeQuiz();serveGuest(g);
+}
+function showKeys(g){
+  CH=null;
+  $('qTitle').textContent=`🔑 Room key for ${g.n}`;$('qSub').textContent='Pick a free room';
+  $('qReceipt').classList.add('hidden');$('qRule').classList.add('hidden');$('qFeedback').innerHTML='';
+  $('qBody').innerHTML=`<div class="prompt-word"><div class="emoji">${g.e}</div></div><div class="keys">`+
+    Object.keys(S.rooms).map(id=>{
+      const R=S.rooms[id],D=ROOM_DEF[id],free=R.unlocked&&!R.guest;
+      const st=!R.unlocked?'🔒 Locked':R.guest?'🚫 Taken':`🪙 ${D.fee} per stay`;
+      return `<button class="keybtn ${D.floor===3?'vip':''}" ${free?'':'disabled'} onclick="giveKey(${g.id},'${id}')"><span class="k">🔑</span><b>Room ${id}</b><small>${D.name} · ${st}</small></button>`;
+    }).join('')+`</div>`;
+}
+let calcState=null;
+function startChangeStep(g){
+  CH=null;
+  const total=billTotal(g);
+  let payment=Math.ceil(total/50)*50;if(payment===total)payment+=50;
+  const change=payment-total;
+  calcState={gid:g.id,value:'',correct:change,wrong:0};
+  $('qTitle').textContent=`💵 Cashier · ${g.n}`;$('qSub').textContent='Use the calculator to work out the change';
+  $('qReceipt').classList.remove('hidden');$('qReceipt').innerHTML=
+    g.bill.map(it=>`<div class="rc done"><span>${it.icon} ${it.label}</span><span>${it.price} 🪙</span></div>`).join('')+
+    `<div class="tot">Total: ${total} 🪙 · Guest paid: ${payment} 🪙</div>`;
+  $('qRule').classList.add('hidden');$('qFeedback').innerHTML='';
+  renderCalc();
+}
+function renderCalc(){
+  if(!calcState)return;
+  $('qBody').innerHTML=`<div class="ask-line">Paid − Total = Change. How much change?</div>
+    <div class="calcDisplay" id="calcDisplay">${calcState.value||'0'} 🪙</div>
+    <div class="calcgrid">
+      ${[7,8,9,4,5,6,1,2,3].map(n=>`<button class="calcbtn" onclick="calcPress(${n})">${n}</button>`).join('')}
+      <button class="calcbtn" onclick="calcClear()">C</button>
+      <button class="calcbtn" onclick="calcPress(0)">0</button>
+      <button class="calcbtn" onclick="calcBack()">⌫</button>
+    </div>
+    <div class="row"><button class="btn green" onclick="calcSubmit()">✔ Give change</button></div>`;
+}
+function calcPress(d){if(!calcState)return;if(calcState.value.length<3)calcState.value+=String(d);sfx.pop();renderCalc();}
+function calcClear(){if(!calcState)return;calcState.value='';renderCalc();}
+function calcBack(){if(!calcState)return;calcState.value=calcState.value.slice(0,-1);renderCalc();}
+function calcSubmit(){
+  if(!calcState)return;
+  const g=S.guests[calcState.gid];if(!g)return;
+  const val=calcState.value===''?-1:Number(calcState.value);
+  if(val===calcState.correct){
+    sfx.ok();confetti(20);
+    $('qFeedback').innerHTML=`🎉 Correct! ${calcState.correct} 🪙 change given.`;
+    const gg=g;calcState=null;
+    setTimeout(()=>{closeQuiz();payBill(gg)},1000);
+  }else{
+    calcState.wrong++;
+    const penalty=[10,20,30][Math.min(calcState.wrong,3)-1];
+    S.coins=Math.max(0,S.coins-penalty);
+    sfx.bad();
+    $('qFeedback').innerHTML=`Not quite — try again! -${penalty} 🪙`;
+    calcState.value='';updateHUD();renderCalc();
+  }
+}
+function closeQuiz(){
+  CH=null;calcState=null;closeOverlay('quiz');
+  if('speechSynthesis' in window){try{speechSynthesis.cancel()}catch(e){}}
+}
+
+function openWords(){renderDict('all');openOverlay('dict')}
+function renderDict(filter){
+  ['All','Hard','Soft'].forEach(n=>$('tab'+n).classList.toggle('on',n.toLowerCase()===filter));
+  const mastered=WORDS.filter(w=>(S.learn[w.w]||0)>=3).length;
+  $('dictSub').textContent=`Tap a word to hear it! ⭐ Mastered: ${mastered}/${WORDS.length}`;
+  const g=$('dictGrid');g.innerHTML='';
+  WORDS.filter(w=>filter==='all'||w.t===filter).forEach(w=>{
+    const d=document.createElement('div');d.className='wcard';
+    d.style.borderColor=w.t==='hard'?'#93c5fd':'#c4b5fd';
+    d.innerHTML=`${(S.learn[w.w]||0)>=3?'<span class="star">⭐</span>':''}<span class="e">${w.e}</span><div class="w">${hl(w.w)}</div><div class="p">${w.ip}</div>`;
+    d.onclick=()=>{speak(w.w);sfx.pop()};
+    g.appendChild(d);
+  });
+}
+const UPGS=[
+  {k:'speed',e:'🚀',t:'More guests',d:'Guests arrive faster',cost:l=>150+l*120,max:4},
+  {k:'patience',e:'🧘',t:'Patient guests',d:'Guests wait longer',cost:l=>200+l*150,max:4},
+  {k:'bonus',e:'💰',t:'Bonus coins',d:'+5 coins for each right answer',cost:l=>250+l*180,max:4}
+];
+function openUpgrades(){renderUpgrades();openOverlay('upg')}
+function renderUpgrades(){
+  const l=$('upgList');l.innerHTML='';
+  UPGS.forEach(u=>{
+    const lv=S.upg[u.k],maxed=lv>=u.max,cost=u.cost(lv);
+    const d=document.createElement('div');d.className='upg';
+    d.innerHTML=`<span class="e">${u.e}</span><div class="t">${u.t} · Level ${lv}/${u.max}<small>${u.d}</small></div>`;
+    const b=document.createElement('button');
+    b.className='btn '+(maxed?'gray':'gold');b.disabled=maxed;b.textContent=maxed?'MAX':`${cost} 🪙`;
+    b.onclick=()=>{
+      if(S.coins<cost){toast('Not enough coins yet!');sfx.bad();return}
+      S.coins-=cost;S.upg[u.k]++;sfx.coin();toast(`${u.t} upgraded! ⭐`);
+      updateHUD();renderUpgrades();save();
+    };
+    d.appendChild(b);l.appendChild(d);
+  });
+}
+
+function tick(){
+  if(isPaused())return;
+  if(S.gameOver)return;
+  G().forEach(g=>{
+    if(g.state==='need'){
+      g.patience-=RATE[g.kind]*(1-.15*S.upg.patience);
+      if(g.patience<=0){guestLeaves(g);return}
+      const el=$('pat-'+g.id);
+      if(el){el.style.width=Math.max(0,g.patience)+'%';el.style.background=patColor(g.patience)}
+      const gc=$('gc-'+g.id);if(gc)gc.classList.toggle('urgent',g.patience<30);
+    }else if(g.state==='idle'){
+      g.timer-=1;if(g.timer<=0)nextActivity(g);
+    }
+  });
+  if(isOpen()){
+    S.spawnIn-=1;
+    if(S.spawnIn<=0){spawnGuest();S.spawnIn=nextSpawn()}
+  }
+  if(S.bellCd>0)S.bellCd--;
+  if(S.happy<100)S.happy=Math.min(100,S.happy+.04);
+  S.timeMin+=MIN_PER_TICK;
+  if(S.timeMin>=CLOSE_MIN){endOfDay()}
+  updateHUD();renderNav();
+  if(++S._t%5===0)save();
+}
+
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{
+  if(e.target===o){if(o.id==='ov-quiz')closeQuiz();else o.classList.remove('open')}
+}));
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')document.querySelectorAll('.overlay.open').forEach(o=>{if(o.id==='ov-quiz')closeQuiz();else o.classList.remove('open')});
+});
+function init(){
+  load();
+  $('muteBtn').textContent=S.mute?'🔇':'🔊';
+  applyTheme();
+  updateHUD();renderAll();
+  if(S.gameOver){
+    toast('🏨 The hotel has finished its 5-day run. Reset in Upgrades to play again!');
+  }else{
+    setTimeout(()=>{spawnGuest();toast('Welcome to '+S.hotelName+'! Tap the guest in the lobby 👆')},500);
+    S.spawnIn=6;
+  }
+  tickTimer=setInterval(tick,1000);
+}
+init();
+</script>
+</body>
+</html>
